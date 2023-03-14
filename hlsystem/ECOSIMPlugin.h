@@ -8,6 +8,34 @@
 #include <SOP/SOP_Node.h>
 #include "LSystem.h"
 
+///////// GLOBAL VARIABLES
+//// Tree Growth State
+// SEED = age 0, 1
+#define SEED 0 
+// JUVENILE = age 2, 3, 4
+#define JUVENILE 1
+// MATURE = age >= 5
+#define MATURE 2 
+// DECAY = if absorbed less than threshold of water 
+#define DECAY 3
+
+//// Tree Preferred Climate
+// Threshold water absorption required for growth 
+// Only mature trees can decay. Juvenile and seeds will die if they do not receive threshold of water 
+#define WET_CLIMATE 3.0
+#define DRY_CLIMATE 1.0
+
+struct Tree {
+    vec3 position;
+    int age;
+    int growthStage;
+    int preferredClimate;
+    float waterAbsorbed;
+    string meshFile;
+};
+
+
+
 namespace HDK_Sample {
 class SOP_Lsystem : public SOP_Node
 {
