@@ -141,6 +141,97 @@ SOP_Lsystem::disableParms()
     return 0;
 }
 
+SOP_Lsystem::spawnSeed(vec3 parentPos) {
+	Tree babyTree;
+	float deltaX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	float deltaY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+	// TODO: z value needs to be from height field Subtask 4.3
+	babyTree.position = vec3(deltaX, deltaY, parentPos[2]);
+	babyTree.age = 0;
+	babyTree.growthStage = SEED;
+
+	seedlings.push(babyTree);
+}
+
+SOP_Lsystem::updateGrowthStage(Tree t) {
+	// update growth stage 
+	// tree was decaying
+	if (t.growStage == DECAY) {
+		t.growthStage = MATURE;
+	} else if (t.age < JUVENILE_MIN_AGE) { 
+		t.growthStage == SEED;
+	} else if (t.age < MATURE_MIN_AGE) {
+		t.growthStage == JUVENILE;
+	} else if (t.age == MATURE_MIN_AGE) { // just became MATURE
+		t.growthStage == MATURE;
+		spawnSeed(t.position);
+	}
+}
+
+SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
+	t.waterAbsorbed = vegetationWater_values[x, y];
+	if(t.waterAbsorbed >= WET_CLIMATE) {
+		// GROW
+		t.age += 1;
+		updateGrowthStage(&t);
+	} else {
+		// DECAY 
+		if (t.growthStage != MATURE) {
+			// SEED, JUVENILE, and DECAYing trees die
+			t.growthStage = DEAD;
+		} else {
+			t.growthStage = DECAY;
+		}
+	}
+}
+
+SOP_Lsystem::ecoSim() 
+{
+	for(int x = 0; x < TERRAIN_SIZE; ++x) {
+		for (int y = 0; y < TERRAIN_SIZE; ++y) {
+			// turn VAPOR into PRECIPITATION
+			condensation(x, y); // updates precipitation map
+			
+			// turn PRECIPITATION into SOIL WATER
+			soilWaterDiffusion(x, y); // updates soil water map
+
+			// turn SOIL WATER into VEGETATION WATER
+			absorption(x, y); // update vegetation water 
+		}
+	} 
+
+	// turn VEGETATION WATER into VEGETATION
+	float[TERRAIN_SIZE][TERRAIN_SIZE] biomass_values = 0.0;
+	for(Tree t : trees) {
+		int x = floor(t.position[0]);
+		int y = floor(t.position[1]);
+		// update tree waterAbsorbed with VEGETATION WATER
+		vegetationGrowth(&t);
+		displayTree(&t); // TODO: Subtask 3.1
+		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
+	}
+
+	// Add seedlings to Trees and Biomass
+	while(seedlings.size() > 0) {
+		Tree t = seedlings.pop_back();
+		trees.push_back(t);
+
+		int x = floor(t.position[0]);
+		int y = floor(t.position[1]);
+		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
+	}
+	
+	// turn VEGETATION into EVAPORATION
+	for(int x = 0; x < TERRAIN_SIZE; ++x) {
+		for (int y = 0; y < TERRAIN_SIZE; ++y) {
+			// updates vapor map
+			evaporation(x, y, biomass_values[x][y]);
+		}
+	}
+}
+
+
 OP_ERROR
 SOP_Lsystem::cookMySop(OP_Context &context)
 {
