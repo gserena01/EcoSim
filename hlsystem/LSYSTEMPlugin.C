@@ -146,6 +146,9 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 {
 	fpreal		 now = context.getTime();
 
+
+	std::cout << "Hello World" << std::endl;
+
 	// PUT YOUR CODE HERE
 	// Decare the necessary variables and get always keep getting the current value in the node
 	// For example to always get the current angle thats set in the node ,you need to :
