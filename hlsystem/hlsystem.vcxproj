@@ -111,7 +111,7 @@
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">
-    <OutDir>C:\Users\Kyra\Documents\houdini19.5\dso</OutDir>
+    <OutDir>..\..\..\..\Houdini_DSO</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -283,6 +283,7 @@
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="vec.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -295,6 +296,7 @@
     <ClInclude Include="matrix.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
