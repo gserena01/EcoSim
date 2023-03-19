@@ -15,8 +15,10 @@
 #define TERRAIN_SIZE 10
 // evaporation constance
 #define EVAP_CONSTANT 3.0
-// maximum water that a plant can absorb
-#define MAX_ABSORB 5.0
+// water that a wet climate plant requires to grow
+// all wet climate trees require half their mass in water 
+// Only mature trees can decay. Juvenile and seeds will die if they do not receive threshold of water 
+#define ABSORB_WET_CLIMATE 0.5
 // transpiration coefficient
 #define TRANSPIRATION 3.0
 
@@ -35,14 +37,7 @@
 // DEAD = to be deleted when displaying
 #define DEAD 4
 
-
-//// Tree Preferred Climate
-// Threshold water absorption required for growth 
-// Only mature trees can decay. Juvenile and seeds will die if they do not receive threshold of water 
-#define WET_CLIMATE 3.0
-#define DRY_CLIMATE 1.0
-
-//// Tree Mesh Files
+//// Tree Mesh Files AKA Heights and biomass values 
 // TODO: will store strings to file locations
 // height values for rectangles for now
 float TreeMeshFiles[4];
@@ -57,7 +52,6 @@ struct Tree {
     int age;
     int growthStage;
     /// int preferredClimate;  TODO: Subtask 6.3
-    float waterAbsorbed;
     string meshFile;
 };
 
@@ -136,7 +130,7 @@ private:
     // assuming information stored, x, y, z (where z is height)
     float[TERRAIN_SIZE][TERRAIN_SIZE] precipitation_values;
     float[TERRAIN_SIZE][TERRAIN_SIZE] soilWater_values;
-    float[TERRAIN_SIZE][TERRAIN_SIZE] vegetationWater_values;
+    float[TERRAIN_SIZE][TERRAIN_SIZE] vegetationNeeds_values;
     // how much water the plants on that cell need
 	float[TERRAIN_SIZE][TERRAIN_SIZE] biomass_values;
 

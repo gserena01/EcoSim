@@ -172,8 +172,7 @@ SOP_Lsystem::updateGrowthStage(Tree t) {
 
 SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
 	// Update vegetation based on water absorption
-	t.waterAbsorbed = soilWater_values[x, y];
-	if(t.waterAbsorbed >= WET_CLIMATE) {
+	if(soilWater_values[x, y] >= vegetationNeeds_values[x][y]) {
 		// GROW
 		t.age += 1;
 		updateGrowthStage(&t);
@@ -207,18 +206,18 @@ void SOP_Lsystem::soilWaterDiffusion() {
 	// Updates soilWater_values map based on precipitation
 	for(int x = 0; x < TERRAIN_SIZE; ++x) {
 		for(int y = 0; y < TERRAIN_SIZE; ++y) {
-			soilWater_values[x][y] += precipitation_values[x][y] - vegetationWater_values[x][y] - EVAP_CONSTANT;
+			soilWater_values[x][y] += precipitation_values[x][y] - vegetationNeeds_values[x][y] - EVAP_CONSTANT;
 		}
 	}
 }
 
-void SOP_Lsystem::absorption() {
-	// Updates vegetationWater_values based on how much water is needed by the plants in the cell
+float SOP_Lsystem::absorption() {
 	for (int x = 0; x < TERRAIN_SIZE; ++x) {
 		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			vegetationWater_values[x][y] = MAX_ABSORB * biomass_values[x][y];
+			vegetationNeeds_values[x][y] = ABSORB_WET_CLIMATE * biomass_values[x][y];
 		}
 	}
+
 }
 
 void SOP_Lsystem::evaporation() {
