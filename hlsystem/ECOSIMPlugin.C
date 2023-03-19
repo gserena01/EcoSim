@@ -150,12 +150,13 @@ SOP_Lsystem::spawnSeed(vec3 parentPos) {
 	babyTree.position = vec3(deltaX, deltaY, parentPos[2]);
 	babyTree.age = 0;
 	babyTree.growthStage = SEED;
+	// TODO: connect to particle node????
 
 	seedlings.push(babyTree);
 }
 
 SOP_Lsystem::updateGrowthStage(Tree t) {
-	// update growth stage 
+	// update growth stage in tree struct
 	// tree was decaying
 	if (t.growStage == DECAY) {
 		t.growthStage = MATURE;
@@ -170,7 +171,8 @@ SOP_Lsystem::updateGrowthStage(Tree t) {
 }
 
 SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
-	t.waterAbsorbed = vegetationWater_values[x, y];
+	// Update vegetation based on water absorption
+	t.waterAbsorbed = soilWater_values[x, y];
 	if(t.waterAbsorbed >= WET_CLIMATE) {
 		// GROW
 		t.age += 1;
@@ -186,31 +188,73 @@ SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
 	}
 }
 
+void SOP_Lsystem::condensation() {
+	// Update precipitation map based on vapor values
+	// sum all vapor into precipitation
+	for (int x = 0; x < TERRAIN_SIZE; ++x) {
+		for(int y = 0; y < TERRAIN_SIZE; ++y) {
+			float total_rain = 0.0;
+			for(int z = 0; z < TERRAIN_SIZE; ++z) {
+				total_rain += vapor_values[x][y][z];
+			}
+			precipitation_values[x][y] = total_rain;
+		}
+	}
+
+}
+
+void SOP_Lsystem::soilWaterDiffusion() {
+	// Updates soilWater_values map based on precipitation
+	for(int x = 0; x < TERRAIN_SIZE; ++x) {
+		for(int y = 0; y < TERRAIN_SIZE; ++y) {
+			soilWater_values[x][y] += precipitation_values[x][y] - vegetationWater_values[x][y] - EVAP_CONSTANT;
+		}
+	}
+}
+
+void SOP_Lsystem::absorption() {
+	// Updates vegetationWater_values based on how much water is needed by the plants in the cell
+	for (int x = 0; x < TERRAIN_SIZE; ++x) {
+		for (int y = 0; y < TERRAIN_SIZE; ++y) {
+			vegetationWater_values[x][y] = MAX_ABSORB * biomass_values[x][y];
+		}
+	}
+}
+
+void SOP_Lsystem::evaporation() {
+	// Updates vapor map based on vegetaion biomass
+	for (int x = 0; x < TERRAIN_SIZE; ++x) {
+		for (int y = 0; y < TERRAIN_SIZE; ++y) {
+			for(int z = 0; z < TERRAIN_SIZE; ++z) {
+				vapor_values[x][y][z] = TRANSPIRATION * (1.0 / z) * biomass_values[x][y];
+				// TODO: apply noise (Gaussian), Subtask 6.1
+			}
+		}
+	}
+}
+
 SOP_Lsystem::ecoSim() 
 {
-	for(int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			// turn VAPOR into PRECIPITATION
-			condensation(x, y); // updates precipitation map
+	// turn VAPOR into PRECIPITATION
+	condensation(); // updates precipitation map
 			
-			// turn PRECIPITATION into SOIL WATER
-			soilWaterDiffusion(x, y); // updates soil water map
-
-			// turn SOIL WATER into VEGETATION WATER
-			absorption(x, y); // update vegetation water 
-		}
-	} 
+	// turn PRECIPITATION into SOIL WATER
+	soilWaterDiffusion(); // updates soil water map
 
 	// turn VEGETATION WATER into VEGETATION
-	float[TERRAIN_SIZE][TERRAIN_SIZE] biomass_values = 0.0;
+	float[TERRAIN_SIZE][TERRAIN_SIZE] new_biomass_values = 0.0;
 	for(Tree t : trees) {
 		int x = floor(t.position[0]);
 		int y = floor(t.position[1]);
 		// update tree waterAbsorbed with VEGETATION WATER
 		vegetationGrowth(&t);
 		displayTree(&t); // TODO: Subtask 3.1
-		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
+		new_biomass_values[x][y] += TreeMeshFiles[t.growthStage];
 	}
+	biomass_values = new_biomass_values;
+
+	// update the water needs of VEGETATION
+	absorption(); // update vegetation water map
 
 	// Add seedlings to Trees and Biomass
 	while(seedlings.size() > 0) {
@@ -223,12 +267,8 @@ SOP_Lsystem::ecoSim()
 	}
 	
 	// turn VEGETATION into EVAPORATION
-	for(int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			// updates vapor map
-			evaporation(x, y, biomass_values[x][y]);
-		}
-	}
+	evaporation(x, y, biomass_values[x][y]);
+
 }
 
 

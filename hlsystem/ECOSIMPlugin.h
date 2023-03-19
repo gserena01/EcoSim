@@ -13,6 +13,12 @@
 // 10x10 cell grid for terrain 
 // 0x0 is left bottom corner
 #define TERRAIN_SIZE 10
+// evaporation constance
+#define EVAP_CONSTANT 3.0
+// maximum water that a plant can absorb
+#define MAX_ABSORB 5.0
+// transpiration coefficient
+#define TRANSPIRATION 3.0
 
 //// Tree Growth State
 // SEED = age 0, 1
@@ -74,9 +80,9 @@ public:
 protected:
 
     // Climatic Processes on that grid cell
-    void condensation(int x, int y);
-    void soilWaterDiffusion(int x, int y);
-    void absorption(int x, int y);
+    void condensation();
+    void soilWaterDiffusion();
+    void absorption();
     void vegetationGrowth(Tree t, int x, int y);
     void evaporation(int x, int y, float biomass);
 
@@ -126,10 +132,13 @@ protected:
 private:
     
     std::vector<Tree> trees;
-    float[TERRAIN_SIZE][TERRAIN_SIZE] vapor_values;
+    float[TERRAIN_SIZE][TERRAIN_SIZE][TERRAIN_SIZE] vapor_values;
+    // assuming information stored, x, y, z (where z is height)
     float[TERRAIN_SIZE][TERRAIN_SIZE] precipitation_values;
     float[TERRAIN_SIZE][TERRAIN_SIZE] soilWater_values;
     float[TERRAIN_SIZE][TERRAIN_SIZE] vegetationWater_values;
+    // how much water the plants on that cell need
+	float[TERRAIN_SIZE][TERRAIN_SIZE] biomass_values;
 
     // keeps track of the seeds from that new round 
     // depletes into trees after growth stage (we don't want seeds to also grow this iteration)
