@@ -13,7 +13,7 @@
 #include <OP/OP_OperatorTable.h>
 
 #include <limits.h>
-#include "LSYSTEMPlugin.h"
+#include "ECOSIMPlugin.h"
 using namespace HDK_Sample;
 
 //
@@ -141,135 +141,6 @@ SOP_Lsystem::disableParms()
     return 0;
 }
 
-SOP_Lsystem::spawnSeed(vec3 parentPos) {
-	Tree babyTree;
-	float deltaX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-	float deltaY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-	// TODO: z value needs to be from height field Subtask 4.3
-	babyTree.position = vec3(deltaX, deltaY, parentPos[2]);
-	babyTree.age = 0;
-	babyTree.growthStage = SEED;
-	// TODO: connect to particle node????
-
-	seedlings.push(babyTree);
-}
-
-SOP_Lsystem::updateGrowthStage(Tree t) {
-	// update growth stage in tree struct
-	// tree was decaying
-	if (t.growStage == DECAY) {
-		t.growthStage = MATURE;
-	} else if (t.age < JUVENILE_MIN_AGE) { 
-		t.growthStage == SEED;
-	} else if (t.age < MATURE_MIN_AGE) {
-		t.growthStage == JUVENILE;
-	} else if (t.age == MATURE_MIN_AGE) { // just became MATURE
-		t.growthStage == MATURE;
-		spawnSeed(t.position);
-	}
-}
-
-SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
-	// Update vegetation based on water absorption
-	if(soilWater_values[x, y] >= vegetationNeeds_values[x][y]) {
-		// GROW
-		t.age += 1;
-		updateGrowthStage(&t);
-	} else {
-		// DECAY 
-		if (t.growthStage != MATURE) {
-			// SEED, JUVENILE, and DECAYing trees die
-			t.growthStage = DEAD;
-		} else {
-			t.growthStage = DECAY;
-		}
-	}
-}
-
-void SOP_Lsystem::condensation() {
-	// Update precipitation map based on vapor values
-	// sum all vapor into precipitation
-	for (int x = 0; x < TERRAIN_SIZE; ++x) {
-		for(int y = 0; y < TERRAIN_SIZE; ++y) {
-			float total_rain = 0.0;
-			for(int z = 0; z < TERRAIN_SIZE; ++z) {
-				total_rain += vapor_values[x][y][z];
-			}
-			precipitation_values[x][y] = total_rain;
-		}
-	}
-
-}
-
-void SOP_Lsystem::soilWaterDiffusion() {
-	// Updates soilWater_values map based on precipitation
-	for(int x = 0; x < TERRAIN_SIZE; ++x) {
-		for(int y = 0; y < TERRAIN_SIZE; ++y) {
-			soilWater_values[x][y] += precipitation_values[x][y] - vegetationNeeds_values[x][y] - EVAP_CONSTANT;
-		}
-	}
-}
-
-float SOP_Lsystem::absorption() {
-	for (int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			vegetationNeeds_values[x][y] = ABSORB_WET_CLIMATE * biomass_values[x][y];
-		}
-	}
-
-}
-
-void SOP_Lsystem::evaporation() {
-	// Updates vapor map based on vegetaion biomass
-	for (int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			for(int z = 0; z < TERRAIN_SIZE; ++z) {
-				vapor_values[x][y][z] = TRANSPIRATION * (1.0 / z) * biomass_values[x][y];
-				// TODO: apply noise (Gaussian), Subtask 6.1
-			}
-		}
-	}
-}
-
-SOP_Lsystem::ecoSim() 
-{
-	// turn VAPOR into PRECIPITATION
-	condensation(); // updates precipitation map
-			
-	// turn PRECIPITATION into SOIL WATER
-	soilWaterDiffusion(); // updates soil water map
-
-	// turn VEGETATION WATER into VEGETATION
-	float[TERRAIN_SIZE][TERRAIN_SIZE] new_biomass_values = 0.0;
-	for(Tree t : trees) {
-		int x = floor(t.position[0]);
-		int y = floor(t.position[1]);
-		// update tree waterAbsorbed with VEGETATION WATER
-		vegetationGrowth(&t);
-		displayTree(&t); // TODO: Subtask 3.1
-		new_biomass_values[x][y] += TreeMeshFiles[t.growthStage];
-	}
-	biomass_values = new_biomass_values;
-
-	// update the water needs of VEGETATION
-	absorption(); // update vegetation water map
-
-	// Add seedlings to Trees and Biomass
-	while(seedlings.size() > 0) {
-		Tree t = seedlings.pop_back();
-		trees.push_back(t);
-
-		int x = floor(t.position[0]);
-		int y = floor(t.position[1]);
-		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
-	}
-	
-	// turn VEGETATION into EVAPORATION
-	evaporation(x, y, biomass_values[x][y]);
-
-}
-
 
 OP_ERROR
 SOP_Lsystem::cookMySop(OP_Context &context)
@@ -288,6 +159,8 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	UT_String grammar;
 	GRAMMAR(now, grammar);
 	LSystem myplant;
+
+	EcoSim eco;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -302,6 +175,9 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	myplant.setDefaultAngle(angle);
 	myplant.setDefaultStep(step);
 
+	eco.setVapor();
+	eco.setTrees();
+
 	///////////////////////////////////////////////////////////////////////////////
 
 	// PUT YOUR CODE HERE
@@ -313,6 +189,10 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	for (int i = 0; i < itr ; i++)
 	{
 		  myplant.process(i, branches);
+	}
+
+	for (int i = 0; i < itr; ++i) {
+		eco.cycle();
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
