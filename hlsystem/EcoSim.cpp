@@ -11,15 +11,26 @@ EcoSim::EcoSim()
 
 void EcoSim::setVapor() {
     // TODO: pull from noise vapor map
+    vapor_values = {1.0};
 }
 
 void EcoSim::setTrees() {
     // TODO: pull from existing starter trees on terrain
-    // populates trees vector
-    // update biomass values
 
+    Tree tr;
+    tr.position = vec3(1.0, 1.0, 1.0);
+    tr.age = 3;
+    tr.growStage = JUVENILE;
+    // populates trees vector
+    trees.push_back(tr);
+    // update biomass values
+    for(Tree t : trees) {
+        int x = floor(t.position[0]);
+		int y = floor(t.position[1]);
+        biomass_values[x][y] += TreeMass[t.growStage];
+    }
     // set vegetationNeeds
-    absorption(); // set vegetationNeeds
+    absorptionReqs(); // set vegetationNeeds
 }
 
 
@@ -38,12 +49,12 @@ void EcoSim::cycle()
 		int y = floor(t.position[1]);
 		vegetationGrowth(&t);
 		displayTree(&t); // TODO: Subtask 3.1
-		new_biomass_values[x][y] += TreeMeshFiles[t.growthStage];
+		new_biomass_values[x][y] += TreeMass[t.growthStage];
 	}
 	biomass_values = new_biomass_values;
 
 	// update the water needs of VEGETATION
-	absorption(); // update vegetation water map
+	absorptionReqs(); // update vegetation water map
 
 	// Add seedlings to Trees and Biomass
 	while(seedlings.size() > 0) {
@@ -52,7 +63,7 @@ void EcoSim::cycle()
 
 		int x = floor(t.position[0]);
 		int y = floor(t.position[1]);
-		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
+		biomass_values[x][y] += TreeMass[t.growthStage];
 	}
 	
 	// turn VEGETATION into EVAPORATION
@@ -86,7 +97,8 @@ void EcoSim::soilWaterDiffusion() {
 	}
 }
 
-float EcoSim::absorption() {
+float EcoSim::absorptionReqs() {
+    // Set the amount of water required for the vegetation on a grid cell
 	for (int x = 0; x < TERRAIN_SIZE; ++x) {
 		for (int y = 0; y < TERRAIN_SIZE; ++y) {
 			vegetationNeeds_values[x][y] = ABSORB_WET_CLIMATE * biomass_values[x][y];

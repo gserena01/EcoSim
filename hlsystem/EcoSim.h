@@ -32,7 +32,7 @@ protected:
     // Climatic Processes on that grid cell
     void condensation();
     void soilWaterDiffusion();
-    void absorption();
+    void absorptionReqs();  // Set the amount of water required for the vegetation on a grid cell
     void vegetationGrowth(Tree t, int x, int y);
     void evaporation(int x, int y, float biomass);
 
@@ -59,7 +59,7 @@ private:
     static float EVAP_CONSTANT = 3.0;
 
     // water that a wet climate plant requires to grow
-    // all wet climate trees require half their mass in water 
+    // all wet climate trees requitrre half their mass in water 
     // Only mature trees can decay. Juvenile and seeds will die if they do not receive threshold of water 
     static float ABSORB_WET_CLIMATE = 0.5;
 
@@ -84,14 +84,13 @@ private:
     // MATURE = age >= 5
     static int MATURE_MIN_AGE = 5;
 
-    //// Tree Mesh Files AKA Heights and biomass values 
+    //// TreeMass AKA Heights and biomass values 
     // TODO: will store strings to file locations
-    // height values for rectangles for now
-    static float TreeMeshFiles[4];
-    TreeMeshFiles[SEED] = 0.1;
-    TreeMeshFiles[JUVENILE] = 0.5;
-    TreeMeshFiles[MATURE] = 1.0;
-    TreeMeshFiles[DECAY] = 0.75;
+    static float TreeMass[4];
+    TreeMass[SEED] = 0.1;
+    TreeMass[JUVENILE] = 0.5;
+    TreeMass[MATURE] = 1.0;
+    TreeMass[DECAY] = 0.75;
     
     ///// WATER CYCLE MAP VALUES
 
