@@ -2,5 +2,7 @@
 
 Notes / Work Status 
 --------
-EcoSim class is OUT OF DATE 
-REPLACE after finished debugging with local file in QT  
+EcoSim is fully functional and working as expected! 
+Values and constants need to be tinkered to produce accurate results 
+
+included images show successful test values
