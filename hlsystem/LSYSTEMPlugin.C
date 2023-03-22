@@ -34,8 +34,8 @@ void
 newSopOperator(OP_OperatorTable* table)
 {
 	table->addOperator(
-		new OP_Operator("CusLsystem",			// Internal name
-			"MyLsystem",			// UI name
+		new OP_Operator("CusEcoSim",			// Internal name
+			"ecoSim",			// UI name
 			SOP_Lsystem::myConstructor,	// How to build the SOP
 			SOP_Lsystem::myTemplateList,	// My parameters
 			0,				// Min # of sources
@@ -48,9 +48,9 @@ newSopOperator(OP_OperatorTable* table)
 
 //PUT YOUR CODE HERE
 //You need to declare your parameters here
-static PRM_Name		angleName("angle", "dAngle");
-static PRM_Name		stepName("step", "Step");
-static PRM_Name		grammarName("grammar", "Grammar");
+static PRM_Name		soilName("soil", "Soil Water");
+static PRM_Name		vaporName("vapor", "Vapor Water");
+static PRM_Name		treeName("tree", "TreeMeshFile");
 static PRM_Name		iterationName("iterations", "Iterations");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,10 +60,13 @@ static PRM_Name		iterationName("iterations", "Iterations");
 
 // PUT YOUR CODE HERE
 // You need to setup the initial/default values for your parameters here
-static PRM_Default angleDefault(30.0);
-static PRM_Default stepDefault(4.0);
-static PRM_Default grammarDefault(0, "");
-static PRM_Default iterationDefault(1);
+static PRM_Default soilDefault(1.0);
+static PRM_Default vaporDefault(1.0);
+static PRM_Default treeDefault(0, "");
+static PRM_Default iterationDefault(0);
+
+static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
+								PRM_RANGE_UI, 20);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -72,10 +75,10 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &angleName, &angleDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &stepName, &stepDefault, 0),
-	PRM_Template(PRM_STRING, 1, &grammarName, &grammarDefault),
-	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0),
+	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
+	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
+	PRM_Template(PRM_STRING, 1, &treeName, &treeDefault),
+	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -154,11 +157,11 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	//    float angle;
 	//    angle = ANGLE(now)       
 	//    NOTE : ANGLE is a function that you need to use and it is declared in the header file to update your values instantly while cooking 
-	float angle = ANGLE(now);
-	float step = STEP(now);
+	float soil = SOIL(now);
+	float vapor = VAPOR(now);
 	int itr = ITERATIONS(now);
-	UT_String grammar;
-	GRAMMAR(now, grammar);
+	UT_String treeMeshFile;
+	TREEFILE(now, treeMeshFile);
 	LSystem myplant;
 
 	EcoSim eco;
@@ -172,7 +175,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// myplant.setDefaultAngle(30.0f);
 	// myplant.setDefaultStep(1.0f);
 
-	eco.setVapor(1.0);
+	eco.setVapor(vapor);
 	eco.setTrees();
 
 
@@ -182,7 +185,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// You the need call the below function for all the generations, so that the end points points will be
 	// stored in the branches vector, you need to declare them first
 
-	//eco.cycle();
+	for (int i = 0; i < itr; ++i) {
+		eco.cycle();
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 

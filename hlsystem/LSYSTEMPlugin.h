@@ -60,9 +60,9 @@ namespace HDK_Sample {
         // Here you need to declare functions which need to be called from the .C file to 
         // constantly update the cook function, these functions help you get the current value that the node has
         // Example : To declare a function to fetch angle you need to do it this way 
-        fpreal ANGLE(fpreal t) { return evalFloat("angle", 0, t); }
-        fpreal STEP(fpreal t) { return evalFloat("step", 0, t); }
-        void GRAMMAR(fpreal t, UT_String& str) { return evalString(str, "grammar", 0, t); }
+        fpreal SOIL(fpreal t) { return evalFloat("soil", 0, t); }
+        fpreal VAPOR(fpreal t) { return evalFloat("vapor", 0, t); }
+        void TREEFILE(fpreal t, UT_String& str) { return evalString(str, "grammar", 0, t); }
         int ITERATIONS(fpreal t) { return evalInt("iterations", 0, t); }
 
 

@@ -10,6 +10,7 @@ struct Tree {
     int age;
     int growthStage;
     // int preferredClimate;  TODO: Subtask 6.3
+    int id;
     std::string meshFile;
 };
 
@@ -33,6 +34,11 @@ public:
 
     // transpiration coefficient
     constexpr static const float TRANSPIRATION = 2.0;
+
+    int treeID;
+
+    float theta = 17.0;
+    float seedR = 0.35;
 
     //// Tree Growth State
     // Tree indices
@@ -65,8 +71,6 @@ public:
 
 
     std::vector<Tree> trees;
-
-    int num_alive_trees = 0;
 
     // SETTERS
     void setVapor(float v);

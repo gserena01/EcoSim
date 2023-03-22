@@ -2,6 +2,7 @@
 
 EcoSim::EcoSim()
 {
+    treeID = 0;
     // Default constructor
     // no empty trees, vapor is garbage
     // Precip map is 0.0
@@ -40,12 +41,12 @@ void EcoSim::setTrees() {
     tr.position = vec3(1.0, 1.0, 0.0);
     tr.age = 3;
     tr.growthStage = JUVENILE;
+    tr.id = treeID++;
     // populates trees vector
     trees.push_back(tr);
-    num_alive_trees = trees.size();
 
     // update biomass values
-    for (Tree t : trees) {
+    for (Tree &t : trees) {
         int x = floor(t.position[0]);
         int y = floor(t.position[1]);
         biomass_values[x][y] += TreeMass[t.growthStage];
@@ -81,7 +82,6 @@ void EcoSim::setTreesDecayTest() {
     trees.push_back(tr1);
     trees.push_back(tr2);
     trees.push_back(tr3);
-    num_alive_trees = trees.size();
 
     // update biomass values
     for (Tree t : trees) {
@@ -114,6 +114,7 @@ void EcoSim::cycle()
     // turn VEGETATION into EVAPORATION
     evaporation();
 
+    std::cout << getTreeSize() << std::endl;
 }
 
 //// CLIMATIC PROCESSES
@@ -143,18 +144,17 @@ void EcoSim::soilWaterDiffusion() {
 }
 
 void EcoSim::absorption() {
-    num_alive_trees = 0;
 
     // updates all vegetation based on soil water
     float new_biomass[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
 
-    for (Tree& t : trees) {
+    for (Tree &t : trees) {
         // TODO: find a way to remove DEAD trees (Subtask 6.1)
         if (t.growthStage != DEAD) {
             int x = floor(t.position[0]);
             int y = floor(t.position[1]);
             vegetationGrowth(t, x, y);
-            displayTree(t); // TODO: Subtask 3.1
+            //displayTree(t); // TODO: Subtask 3.1
             new_biomass[x][y] += TreeMass[t.growthStage];
         }
     }
@@ -192,7 +192,7 @@ void EcoSim::evaporation() {
 
 //// TREE HELPER FUNCTIONS
 
-void EcoSim::vegetationGrowth(Tree& t, int x, int y) {
+void EcoSim::vegetationGrowth(Tree &t, int x, int y) {
     // Update vegetation based on soil water 
     if (soilWater_values[x][y] >= vegetationNeeds_values[x][y]) {
         // GROW
@@ -204,6 +204,7 @@ void EcoSim::vegetationGrowth(Tree& t, int x, int y) {
         if (t.growthStage != MATURE) {
             // SEED, JUVENILE, and DECAYing trees die
             t.growthStage = DEAD;
+            std::cout << "TREE DIED! ID: " << t.id << std::endl;
         }
         else {
             t.growthStage = DECAY;
@@ -211,7 +212,7 @@ void EcoSim::vegetationGrowth(Tree& t, int x, int y) {
     }
 }
 
-void EcoSim::increaseGrowthStage(Tree& t) {
+void EcoSim::increaseGrowthStage(Tree &t) {
     // update growth stage in tree struct
     // tree was decaying
     if (t.growthStage == DECAY) {
@@ -233,21 +234,28 @@ void EcoSim::increaseGrowthStage(Tree& t) {
 
 void EcoSim::spawnSeed(vec3 parentPos) {
     Tree babyTree;
-    float deltaX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float deltaY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    babyTree.age = 0;
+    babyTree.growthStage = SEED;
+    babyTree.id = treeID++;
+    // TODO: connect to particle node????
+
+    //float deltaX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    //float deltaY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+    float deltaX = cos(babyTree.id * theta) * seedR;
+    float deltaY = sin(babyTree.id * theta) * seedR;
 
     // TODO: z value needs to be from height field Subtask 4.3
     babyTree.position = vec3(deltaX + parentPos[0], deltaY + parentPos[1], parentPos[2]);
-    babyTree.age = 0;
-    babyTree.growthStage = SEED;
-    // TODO: connect to particle node????
+    //babyTree.position = vec3(parentPos[0] + 1.0, parentPos[1] + 1.0, 0.0);
+
 
     seedlings.push_back(babyTree);
 }
 
 void EcoSim::updateSeeds() {
     while (seedlings.size() > 0) {
-        Tree t = seedlings.back();
+        Tree &t = seedlings.back();
         seedlings.pop_back();
         trees.push_back(t);
 
@@ -259,15 +267,19 @@ void EcoSim::updateSeeds() {
 
 void EcoSim::displayTree(Tree& t) {
     // TODO
-    if (t.growthStage != DEAD) {
-        num_alive_trees++;
-    }
+
 }
 
 
 //// GETTERS & PRINTERS
 int EcoSim::getTreeSize() {
-    return num_alive_trees;
+    int aliveT = 0;
+    for (Tree& t : trees) {
+        if (t.growthStage != DEAD) {
+            aliveT++;
+        }
+    }
+    return aliveT;
 }
 
 void EcoSim::printVapor() {
