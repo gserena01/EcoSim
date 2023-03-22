@@ -16,6 +16,7 @@ struct Tree {
 
 class EcoSim
 {
+public:
     ////// STATIC GLOBAL VALUES
 
     // default 10x10x10 cell grid for terrain
@@ -55,8 +56,6 @@ class EcoSim
     // TODO: will store strings to file locations
     constexpr const static float TreeMass[5] = { 0.1, 0.5, 1.0, 0.75, 0.0 };
 
-
-public:
     EcoSim();
 
     // takes in all trees currently in the scene and 

@@ -172,10 +172,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// myplant.setDefaultAngle(30.0f);
 	// myplant.setDefaultStep(1.0f);
 
-	myplant.loadProgram(grammar.toStdString());
-	myplant.setDefaultAngle(angle);
-	myplant.setDefaultStep(step);
-
+	eco.setVapor(1.0);
+	eco.setTrees();
 
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -184,12 +182,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// You the need call the below function for all the generations, so that the end points points will be
 	// stored in the branches vector, you need to declare them first
 
-	std::vector<LSystem::Branch> branches;
-
-	for (int i = 0; i < itr; i++)
-	{
-		myplant.process(i, branches);
-	}
+	//eco.cycle();
 
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -234,21 +227,21 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			// Build a polygon
 
 			// loop through branches
-			for (int i = 0; i < branches.size(); ++i) {
-				LSystem::Branch b = branches.at(i);
+			for (int i = 0; i < eco.trees.size(); ++i) {
+				Tree t = eco.trees.at(i);
 
-				vec3 s = b.first;
-				vec3 e = b.second;
+				vec3 p = t.position;
+				float h = eco.TreeMass[t.growthStage];
 
 				UT_Vector3 start;
-				start(xcoord) = s[0];
-				start(ycoord) = s[2];
-				start(zcoord) = s[1];
+				start(xcoord) = p[0];
+				start(ycoord) = p[2];
+				start(zcoord) = p[1];
 
 				UT_Vector3 end;
-				end(xcoord) = e[0];
-				end(ycoord) = e[2];
-				end(zcoord) = e[1];
+				end(xcoord) = p[0];
+				end(ycoord) = p[2] + h;
+				end(zcoord) = p[1];
 
 				poly = GU_PrimPoly::build(gdp, 2, 0, 1);
 

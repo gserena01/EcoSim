@@ -2,7 +2,7 @@
 
 Notes / Work Status 
 --------
-EcoSim is fully functional and working as expected! 
-Values and constants need to be tinkered to produce accurate results 
+This branch uses the working EcoSim class to output a single tree (the original output, no cycles). 
 
-included images show successful test values
+Look at that tree! hell yea!
+![](./test_defaultA_Houdini.png)
