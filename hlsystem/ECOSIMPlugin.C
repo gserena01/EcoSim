@@ -171,11 +171,8 @@ SOP_Lsystem::cookMySop(OP_Context &context)
     // myplant.setDefaultAngle(30.0f);
     // myplant.setDefaultStep(1.0f);
 
-	myplant.loadProgram(grammar.toStdString());
-	myplant.setDefaultAngle(angle);
-	myplant.setDefaultStep(step);
 
-	eco.setVapor();
+	eco.setVapor(1.0);
 	eco.setTrees();
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -184,16 +181,9 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	// You the need call the below function for all the generations, so that the end points points will be
 	// stored in the branches vector, you need to declare them first
 
-	std::vector<LSystem::Branch> branches;
 
-	for (int i = 0; i < itr ; i++)
-	{
-		  myplant.process(i, branches);
-	}
+	//eco.cycle();
 
-	for (int i = 0; i < itr; ++i) {
-		eco.cycle();
-	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -237,22 +227,21 @@ SOP_Lsystem::cookMySop(OP_Context &context)
         // PUT YOUR CODE HERE
 	    // Build a polygon
 
-		// loop through branches
-		for (int i = 0; i < branches.size(); ++i) {
-			LSystem::Branch b = branches.at(i);
-
-			vec3 s = b.first;
-			vec3 e = b.second;
+		// loop through trees
+		for (int i = 0; i < eco.trees.size(); ++i) {
+			EcoSim::Tree t = eco.trees.at(i);
 
 			UT_Vector3 start;
-			start(xcoord) = s[0];
-			start(ycoord) = s[2];
-			start(zcoord) = s[1];
+			start(xcoord) = t.position[0];
+			start(ycoord) = t.position[1];
+			start(zcoord) = t.position[2];
+
+			float height = EcoSim::TreeMass[t.grothStage];
 
 			UT_Vector3 end;
-			end(xcoord) = e[0];
-			end(ycoord) = e[2];
-			end(zcoord) = e[1];
+			end(xcoord) = t.position[0];
+			end(ycoord) = t.position[1];
+			end(zcoord) = t.position[2] + height;
 
 			poly = GU_PrimPoly::build(gdp, 2, 0, 1);
 
@@ -261,7 +250,6 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 
 			ptoff = poly->getPointOffset(1);
 			gdp->setPos3(ptoff, end);
-
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,4 +268,5 @@ SOP_Lsystem::cookMySop(OP_Context &context)
     myCurrPoint = -1;
     return error();
 }
+
 

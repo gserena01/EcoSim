@@ -64,6 +64,11 @@ public:
     // Ex: if vapor_values[0][0] = 3.0, then all the soil in the cell 0,0 (representing the left hand corner of the 1x1 cell) has 3.0 vapor
     void cycle();
 
+
+    std::vector<Tree> trees;
+
+    int num_alive_trees = 0;
+
     // SETTERS
     void setVapor(float v);
     void setTrees();
@@ -105,11 +110,6 @@ protected:
 private:
 
     ///// WATER CYCLE MAP VALUES
-
-    // vector of Trees
-    std::vector<Tree> trees;
-
-    int num_alive_trees = 0;
 
     // 3D volume of vapor in column 
     // assuming information stored, x, y, z (where z is height)
