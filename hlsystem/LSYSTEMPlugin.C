@@ -11,6 +11,7 @@
 #include <PRM/PRM_SpareData.h>
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
+#include <HAPI/HAPI.h>
 
 #include <limits.h>
 #include "LSYSTEMPlugin.h"
@@ -176,6 +177,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// myplant.setDefaultStep(1.0f);
 
 	eco.setVapor(vapor);
+	eco.setSoilWater(soil);
 	eco.setTrees();
 
 
@@ -205,6 +207,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	int			 i;
 	UT_Interrupt* boss;
 
+
 	// Since we don't have inputs, we don't need to lock them.
 
 	divisions = 5;	// We need twice our divisions of points
@@ -230,6 +233,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		{
 			// PUT YOUR CODE HERE
 			// Build a polygon
+			HAPI_LoadHIPFile(NULL, "$HIP/Documents/_PENN_SP2023/CIS6600/EcoSim/objs/tree_seed.obj", true);
+			// ^^^ This doesn't work and it is not the right approach because HIP is like a "scene" file
 
 			// loop through branches
 			for (int i = 0; i < eco.trees.size(); ++i) {
