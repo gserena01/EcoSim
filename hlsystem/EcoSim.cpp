@@ -6,12 +6,11 @@ EcoSim::EcoSim()
     // Default constructor
     // no empty trees, vapor is garbage
     // Precip map is 0.0
-    // Soil map is 1.0
-    setSoilWater(1.0);
     // Biomass map is 0.0
 }
 
 void EcoSim::setVapor(float v) {
+    vaporSet = true;
     // TODO: pull from noise vapor map
     // sets vapor map
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
@@ -24,6 +23,7 @@ void EcoSim::setVapor(float v) {
 }
 
 void EcoSim::setSoilWater(float s) {
+    soilSet = true;
     // TODO: set with a noise function?? or a better default?
     // sets soil water map
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
@@ -36,6 +36,7 @@ void EcoSim::setSoilWater(float s) {
 void EcoSim::setTrees() {
     // TODO: pull from existing starter trees on terrain
     // sets trees vector, biomass map, vegetationNeeds map
+    treeSet = true;
 
     Tree tr;
     tr.position = vec3(1.0, 1.0, 0.0);
@@ -57,6 +58,7 @@ void EcoSim::setTrees() {
 
 void EcoSim::setTreesDecayTest() {
     // sets trees vector, biomass map, vegetationNeeds map
+    treeSet = true;
 
     Tree tr;
     tr.position = vec3(1.0, 1.0, 0.0);
@@ -96,6 +98,12 @@ void EcoSim::setTreesDecayTest() {
 
 void EcoSim::cycle()
 {
+
+    // check if initial values are set
+    if (!(treeSet && vaporSet && soilSet)) {
+        return;
+    }
+
     // turn VAPOR into PRECIPITATION
     condensation(); // updates precipitation map
 

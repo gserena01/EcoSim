@@ -112,6 +112,10 @@ protected:
 
 private:
 
+    bool vaporSet = false;
+    bool soilSet = false;
+    bool treeSet = false;
+
     ///// WATER CYCLE MAP VALUES
 
     // 3D volume of vapor in column 
@@ -122,7 +126,7 @@ private:
     float precipitation_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
 
     // amount of water in the soil
-    float soilWater_values[TERRAIN_SIZE][TERRAIN_SIZE];
+    float soilWater_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
 
     // how much water the plants on that cell need
     float vegetationNeeds_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
