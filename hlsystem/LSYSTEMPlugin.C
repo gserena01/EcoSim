@@ -66,7 +66,7 @@ static PRM_Default treeDefault(0, "");
 static PRM_Default iterationDefault(0);
 
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
-								PRM_RANGE_UI, 20);
+								PRM_RANGE_UI, 30);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +176,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// myplant.setDefaultStep(1.0f);
 
 	eco.setVapor(vapor);
+	eco.setSoilWater(soil);
 	eco.setTrees();
 
 
