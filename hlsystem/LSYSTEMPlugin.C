@@ -11,7 +11,7 @@
 #include <PRM/PRM_SpareData.h>
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
-#include <HAPI/HAPI.h>
+#include <OP/OP_Director.h>
 
 #include <limits.h>
 #include "LSYSTEMPlugin.h"
@@ -233,33 +233,45 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		{
 			// PUT YOUR CODE HERE
 			// Build a polygon
-			HAPI_LoadHIPFile(NULL, "$HIP/Documents/_PENN_SP2023/CIS6600/EcoSim/objs/tree_seed.obj", true);
-			// ^^^ This doesn't work and it is not the right approach because HIP is like a "scene" file
 
-			// loop through branches
+			// Loop through trees
 			for (int i = 0; i < eco.trees.size(); ++i) {
+
+				// Create geometry node
+				OP_Network* geoParent;
+				OP_Network* fileParent;
+				OP_Node* geoNode;
+				OP_Node* fileNode;
+
+				// Call Create Node
+				geoParent = (OP_Network*)OPgetDirector()->findNode("/obj");
+				geoNode = geoParent->createNode("geo", "geo1");
+				fileParent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
+				fileNode = fileParent->createNode("file", "file1");
+				int fileLoaded = fileNode->setParameterOrProperty("file", 0, 0, "C:/Users/Kyra/Documents/_PENN_SP2023/CIS6600/EcoSim/objs/tree_mature.obj", CH_STRING_LITERAL);
+
 				Tree t = eco.trees.at(i);
 
 				vec3 p = t.position;
 				float h = eco.TreeMass[t.growthStage];
 
-				UT_Vector3 start;
-				start(xcoord) = p[0];
-				start(ycoord) = p[2];
-				start(zcoord) = p[1];
+				//UT_Vector3 start;
+				//start(xcoord) = p[0];
+				//start(ycoord) = p[2];
+				//start(zcoord) = p[1];
 
-				UT_Vector3 end;
-				end(xcoord) = p[0];
-				end(ycoord) = p[2] + h;
-				end(zcoord) = p[1];
+				//UT_Vector3 end;
+				//end(xcoord) = p[0];
+				//end(ycoord) = p[2] + h;
+				//end(zcoord) = p[1];
 
-				poly = GU_PrimPoly::build(gdp, 2, 0, 1);
+				//poly = GU_PrimPoly::build(gdp, 2, 0, 1);
 
-				GA_Offset ptoff = poly->getPointOffset(0);
-				gdp->setPos3(ptoff, start);
+				//GA_Offset ptoff = poly->getPointOffset(0);
+				//gdp->setPos3(ptoff, start);
 
-				ptoff = poly->getPointOffset(1);
-				gdp->setPos3(ptoff, end);
+				//ptoff = poly->getPointOffset(1);
+				//gdp->setPos3(ptoff, end);
 
 			}
 

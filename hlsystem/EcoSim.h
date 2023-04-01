@@ -11,7 +11,6 @@ struct Tree {
     int growthStage;
     // int preferredClimate;  TODO: Subtask 6.3
     int id;
-    std::string meshFile;
 };
 
 
