@@ -148,8 +148,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	OP_Network* parent;
 	parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
 
-	std::cout << "Hello world" << std::endl;
-
 	// PUT YOUR CODE HERE
 	// Decare the necessary variables and get always keep getting the current value in the node
 	// For example to always get the current angle thats set in the node ,you need to :
@@ -167,7 +165,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!heightfield_file_node->runCreateScript())
 			return error();
 		// set parameters
-		heightfield_file_node->setString(UT_String("`chs(\"../CusLsystem1/terrain\")`"), CH_STRING_LITERAL, "filename", 0, t);
+		heightfield_file_node->setString(UT_String("`chs(\"../CusEcoSim1/terrain\")`"), CH_STRING_LITERAL, "filename", 0, t);
 		// connect the node
 		input = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
 		if (input)
@@ -291,7 +289,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!file_node->runCreateScript())
 			return error();
 		// set parameters
-		file_node->setString(UT_String("`chs(\"../CusLsystem1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
+		file_node->setString(UT_String("`chs(\"../CusEcoSim1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
 		// connect the node
 		input8 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
 		if (input8)
@@ -378,7 +376,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// Select the custom node
 		OPgetDirector()->clearPickedItems();
 		OP_Node* custom_node;
-		custom_node = parent->findNode("CusLsystem1");
+		custom_node = parent->findNode("CusEcoSim1");
 		if (custom_node) {
 			custom_node->pickRequest(true);
 		}
