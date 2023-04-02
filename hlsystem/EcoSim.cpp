@@ -1,4 +1,5 @@
 #include "EcoSim.h"
+#include "Texture.h"
 
 EcoSim::EcoSim()
 {
@@ -10,13 +11,15 @@ void EcoSim::setVapor(float v) {
     vaporSet = true;
     // TODO: pull from noise vapor map
     // sets vapor map
-    for (int x = 0; x < TERRAIN_SIZE; ++x) {
-        for (int y = 0; y < TERRAIN_SIZE; ++y) {
-            for (int z = 0; z < TERRAIN_SIZE; ++z) {
+    /* for (int x = 0; x < 32; ++x) {
+        for (int y = 0; y < 32; ++y) {
+            for (int z = 0; z < 4; ++z) {
                 vapor_values[x][y][z] = v;
             }
         }
-    }
+    }*/
+    Texture tex = Texture(2);
+    vapor_values = tex.tex_arr_3d;
 }
 
 void EcoSim::setSoilWater(float s) {

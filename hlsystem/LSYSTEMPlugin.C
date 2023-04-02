@@ -11,19 +11,11 @@
 #include <PRM/PRM_SpareData.h>
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
+#include <OP/OP_Director.h>
 
 #include <limits.h>
 #include "LSYSTEMPlugin.h"
 using namespace HDK_Sample;
-
-//
-// Help is stored in a "wiki" style text file. 
-//
-// See the sample_install.sh file for an example.
-//
-// NOTE : Follow this tutorial if you have any problems setting up your visual studio 2008 for Houdini 
-//  http://www.apileofgrains.nl/setting-up-the-hdk-for-houdini-12-with-visual-studio-2008/
-
 
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
@@ -39,7 +31,7 @@ newSopOperator(OP_OperatorTable* table)
 			SOP_Lsystem::myConstructor,	// How to build the SOP
 			SOP_Lsystem::myTemplateList,	// My parameters
 			0,				// Min # of sources
-			0,				// Max # of sources
+			1,				// Max # of sources
 			SOP_Lsystem::myVariables,	// Local variables
 			OP_FLAG_GENERATOR)		// Flag it as generator
 	);
@@ -48,9 +40,10 @@ newSopOperator(OP_OperatorTable* table)
 
 //PUT YOUR CODE HERE
 //You need to declare your parameters here
+static PRM_Name terrainName("terrain", "Terrain");
 static PRM_Name		soilName("soil", "Soil Water");
 static PRM_Name		vaporName("vapor", "Vapor Water");
-static PRM_Name		treeName("tree", "TreeMeshFile");
+static PRM_Name	plant1Name("plant1", "Plant1");
 static PRM_Name		iterationName("iterations", "Iterations");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,11 +55,11 @@ static PRM_Name		iterationName("iterations", "Iterations");
 // You need to setup the initial/default values for your parameters here
 static PRM_Default soilDefault(1.0);
 static PRM_Default vaporDefault(1.0);
-static PRM_Default treeDefault(0, "");
 static PRM_Default iterationDefault(0);
-
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
 								PRM_RANGE_UI, 30);
+static PRM_Default terrainDefault(0, "");
+static PRM_Default plant1Default(0, "");
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -75,9 +68,10 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
+		PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
+		PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &plant1Name, &plant1Default, 0),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
-	PRM_Template(PRM_STRING, 1, &treeName, &treeDefault),
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +128,7 @@ SOP_Lsystem::SOP_Lsystem(OP_Network* net, const char* name, OP_Operator* op)
 	: SOP_Node(net, name, op)
 {
 	myCurrPoint = -1;	// To prevent garbage values from being returned
+	networkCreated = -1;
 }
 
 SOP_Lsystem::~SOP_Lsystem() {}
@@ -148,6 +143,10 @@ OP_ERROR
 SOP_Lsystem::cookMySop(OP_Context& context)
 {
 	fpreal		 now = context.getTime();
+	float           t = context.getTime();
+	OP_Node* heightfield_file_node;
+	OP_Network* parent;
+	parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
 
 	std::cout << "Hello world" << std::endl;
 
@@ -157,12 +156,241 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	//    float angle;
 	//    angle = ANGLE(now)       
 	//    NOTE : ANGLE is a function that you need to use and it is declared in the header file to update your values instantly while cooking 
+
+	if (networkCreated < 0) {
+		OP_Node* input;
+		// create node
+		heightfield_file_node = parent->createNode("heightfield_file", "heightfield_file1");
+		if (!heightfield_file_node)
+			return error();
+		// run creation script
+		if (!heightfield_file_node->runCreateScript())
+			return error();
+		// set parameters
+		heightfield_file_node->setString(UT_String("`chs(\"../CusLsystem1/terrain\")`"), CH_STRING_LITERAL, "filename", 0, t);
+		// connect the node
+		input = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
+		if (input)
+		{
+			heightfield_file_node->setInput(0, input);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		heightfield_file_node->moveToGoodPosition();
+
+		OP_Node* heightfield_node;
+		OP_Node* input2;
+		// create node
+		parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
+		heightfield_node = parent->createNode("heightfield", "heightfield1");
+		if (!heightfield_node)
+			return error();
+		// run creation script
+		if (!heightfield_node->runCreateScript())
+			return error();
+		// connect the node
+		input2 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
+		if (input2)
+		{
+			heightfield_node->setInput(0, input2);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		heightfield_node->moveToGoodPosition();
+
+		OP_Node* heightfield_noise_node;
+		OP_Node* input3;
+		// create node
+		heightfield_noise_node = parent->createNode("heightfield_noise", "heightfield_noise1");
+		if (!heightfield_noise_node)
+			return error();
+		// run creation script
+		if (!heightfield_noise_node->runCreateScript())
+			return error();
+		// connect the node
+		input3 = parent->findNode("heightfield1");  // find /obj/geo1/heightfield1 as relative path
+		if (input3)
+		{
+			heightfield_noise_node->setInput(0, input3);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		heightfield_noise_node->moveToGoodPosition();
+
+		OP_Node* switch_node;
+		OP_Node* input4;
+		OP_Node* input5;
+		// create node
+		switch_node = parent->createNode("switch", "switch1");
+		if (!switch_node)
+			return error();
+		// run creation script
+		if (!switch_node->runCreateScript())
+			return error();
+		// connect the node
+		input4 = parent->findNode("heightfield_noise1");  // find /obj/geo1/heightfield1 as relative path
+		input5 = parent->findNode("heightfield_file1");
+		if (input4)
+		{
+			switch_node->setInput(0, input4);       // set first input to /obj/null1
+		}
+		if (input5) {
+			switch_node->setInput(1, input5);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		switch_node->moveToGoodPosition();
+
+		OP_Node* convert_heightfield_node;
+		OP_Node* input6;
+		// create node
+		convert_heightfield_node = parent->createNode("convertheightfield", "convertheightfield1");
+		if (!convert_heightfield_node)
+			return error();
+		// run creation script
+		if (!convert_heightfield_node->runCreateScript())
+			return error();
+		// connect the node
+		input6 = parent->findNode("switch1");  // find /obj/geo1/heightfield1 as relative path
+		if (input6)
+		{
+			convert_heightfield_node->setInput(0, input6);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		convert_heightfield_node->moveToGoodPosition();
+
+		// Scatter node
+		OP_Node* scatter_node;
+		OP_Node* input7;
+		// create node
+		scatter_node = parent->createNode("scatter", "scatter1");
+		if (!scatter_node)
+			return error();
+		// run creation script
+		if (!scatter_node->runCreateScript())
+			return error();
+		// connect the node
+		input7 = parent->findNode("convertheightfield1");  // find /obj/geo1/convertheightfield1 as relative path
+		if (input7)
+		{
+			scatter_node->setInput(0, input7);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		scatter_node->moveToGoodPosition();
+
+		// File Node
+		OP_Node* file_node;
+		OP_Node* input8;
+		// create node
+		file_node = parent->createNode("file", "file1");
+		if (!file_node)
+			return error();
+		// run creation script
+		if (!file_node->runCreateScript())
+			return error();
+		// set parameters
+		file_node->setString(UT_String("`chs(\"../CusLsystem1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
+		// connect the node
+		input8 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
+		if (input8)
+		{
+			file_node->setInput(0, input8);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		file_node->moveToGoodPosition();
+
+		// Pack Node
+		OP_Node* pack_node;
+		OP_Node* input9;
+		// create node
+		pack_node = parent->createNode("pack", "pack1");
+		if (!pack_node)
+			return error();
+		// run creation script
+		if (!pack_node->runCreateScript())
+			return error();
+		// connect the node
+		input9 = parent->findNode("file1");  // find /obj/geo1/null1 as relative path
+		if (input9)
+		{
+			pack_node->setInput(0, input9);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		pack_node->moveToGoodPosition();
+
+		// Copy to Points Node
+		OP_Node* copy_to_points_node;
+		OP_Node* input10;
+		OP_Node* input11;
+		// create node
+		copy_to_points_node = parent->createNode("copytopoints", "copytopoints1");
+		if (!copy_to_points_node)
+			return error();
+		// run creation script
+		if (!copy_to_points_node->runCreateScript())
+			return error();
+		// connect the node
+		input10 = parent->findNode("pack1");  // find /obj/geo1/null1 as relative path
+		input11 = parent->findNode("scatter1");
+		if (input10)
+		{
+			copy_to_points_node->setInput(0, input10);       // set first input to /obj/null1
+		}
+		if (input11) {
+			copy_to_points_node->setInput(1, input11);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		copy_to_points_node->moveToGoodPosition();
+
+		// Merge Node
+		OP_Node* merge_node;
+		OP_Node* input12;
+		OP_Node* input13;
+		// create node
+		merge_node = parent->createNode("merge", "merge1");
+		if (!merge_node)
+			return error();
+		// run creation script
+		if (!merge_node->runCreateScript())
+			return error();
+		//set parameters
+		merge_node->setRender(true);
+		merge_node->setDisplay(true);
+		// connect the node
+		input12 = parent->findNode("switch1");  // find /obj/geo1/null1 as relative path
+		input13 = parent->findNode("copytopoints1");
+		if (input12)
+		{
+			merge_node->setInput(0, input12);       // set first input to /obj/null1
+		}
+		if (input13) {
+			merge_node->setInput(1, input13);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		merge_node->moveToGoodPosition();
+		
+		// Select the custom node
+		OPgetDirector()->clearPickedItems();
+		OP_Node* custom_node;
+		custom_node = parent->findNode("CusLsystem1");
+		if (custom_node) {
+			custom_node->pickRequest(true);
+		}
+
+		networkCreated = 1;
+	}
+
+	std::string terrainFile = TERRAIN(now).toStdString();
+	std::string plant1File = PLANT1(now).toStdString();
 	float soil = SOIL(now);
 	float vapor = VAPOR(now);
 	int itr = ITERATIONS(now);
-	UT_String treeMeshFile;
-	TREEFILE(now, treeMeshFile);
-	LSystem myplant;
 
 	EcoSim eco;
 
@@ -224,6 +452,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			addWarning(SOP_MESSAGE, "Invalid divisions");
 			divisions = 4;
 		}
+
+		// Maybe comment out, maybe not? ~SERENA
 		gdp->clearAndDestroy();
 
 		// Start the interrupt server

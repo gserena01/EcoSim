@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include "vec.h"
+#include <array>
 
 struct Tree {
     vec3 position;
@@ -19,10 +20,10 @@ class EcoSim
 public:
     ////// STATIC GLOBAL VALUES
 
-    // default 10x10x10 cell grid for terrain
+    // default 32x32x32 cell grid for terrain
     // 0x0 is left bottom corner
     // Paper uses ~31x31 cell grid where each grid is 1.5m^2
-    const static int TERRAIN_SIZE = 10;
+    const static int TERRAIN_SIZE = 32;
 
     // evaporation constance
     constexpr const static float EVAP_CONSTANT = 1.5;
@@ -118,7 +119,7 @@ private:
 
     // 3D volume of vapor in column
     // assuming information stored, x, y, z (where z is height)
-    float vapor_values[TERRAIN_SIZE][TERRAIN_SIZE][TERRAIN_SIZE];
+    std::array<std::array<std::array<float, 4>, 32>, 32> vapor_values;
 
     // amount of rain
     float precipitation_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };

@@ -62,22 +62,18 @@ namespace HDK_Sample {
         // Example : To declare a function to fetch angle you need to do it this way 
         fpreal SOIL(fpreal t) { return evalFloat("soil", 0, t); }
         fpreal VAPOR(fpreal t) { return evalFloat("vapor", 0, t); }
-        void TREEFILE(fpreal t, UT_String& str) { return evalString(str, "grammar", 0, t); }
         int ITERATIONS(fpreal t) { return evalInt("iterations", 0, t); }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        UT_String PLANT1(fpreal t) {
+            UT_String str;
+            evalString(str, "plant1", 0, t);
+            return str;
+        }
+        UT_String TERRAIN(fpreal t) {
+            UT_String str;
+            evalString(str, "terrain", 0, t);
+            return str;
+        }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +85,7 @@ namespace HDK_Sample {
         // NOTE : You can declare local variables here like this  
         int		myCurrPoint;
         int		myTotalPoints;
+        int     networkCreated;
     };
 } // End HDK_Sample namespace
 
