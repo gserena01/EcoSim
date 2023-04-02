@@ -13,7 +13,7 @@
 #include <OP/OP_OperatorTable.h>
 
 #include <limits.h>
-#include "LSYSTEMPlugin.h"
+#include "ECOSIMPlugin.h"
 using namespace HDK_Sample;
 
 //
@@ -141,96 +141,6 @@ SOP_Lsystem::disableParms()
     return 0;
 }
 
-SOP_Lsystem::spawnSeed(vec3 parentPos) {
-	Tree babyTree;
-	float deltaX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-	float deltaY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-	// TODO: z value needs to be from height field Subtask 4.3
-	babyTree.position = vec3(deltaX, deltaY, parentPos[2]);
-	babyTree.age = 0;
-	babyTree.growthStage = SEED;
-
-	seedlings.push(babyTree);
-}
-
-SOP_Lsystem::updateGrowthStage(Tree t) {
-	// update growth stage 
-	// tree was decaying
-	if (t.growStage == DECAY) {
-		t.growthStage = MATURE;
-	} else if (t.age < JUVENILE_MIN_AGE) { 
-		t.growthStage == SEED;
-	} else if (t.age < MATURE_MIN_AGE) {
-		t.growthStage == JUVENILE;
-	} else if (t.age == MATURE_MIN_AGE) { // just became MATURE
-		t.growthStage == MATURE;
-		spawnSeed(t.position);
-	}
-}
-
-SOP_Lsystem::vegetationGrowth(Tree t, int x, int y) {
-	t.waterAbsorbed = vegetationWater_values[x, y];
-	if(t.waterAbsorbed >= WET_CLIMATE) {
-		// GROW
-		t.age += 1;
-		updateGrowthStage(&t);
-	} else {
-		// DECAY 
-		if (t.growthStage != MATURE) {
-			// SEED, JUVENILE, and DECAYing trees die
-			t.growthStage = DEAD;
-		} else {
-			t.growthStage = DECAY;
-		}
-	}
-}
-
-SOP_Lsystem::ecoSim() 
-{
-	for(int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			// turn VAPOR into PRECIPITATION
-			condensation(x, y); // updates precipitation map
-			
-			// turn PRECIPITATION into SOIL WATER
-			soilWaterDiffusion(x, y); // updates soil water map
-
-			// turn SOIL WATER into VEGETATION WATER
-			absorption(x, y); // update vegetation water 
-		}
-	} 
-
-	// turn VEGETATION WATER into VEGETATION
-	float[TERRAIN_SIZE][TERRAIN_SIZE] biomass_values = 0.0;
-	for(Tree t : trees) {
-		int x = floor(t.position[0]);
-		int y = floor(t.position[1]);
-		// update tree waterAbsorbed with VEGETATION WATER
-		vegetationGrowth(&t);
-		displayTree(&t); // TODO: Subtask 3.1
-		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
-	}
-
-	// Add seedlings to Trees and Biomass
-	while(seedlings.size() > 0) {
-		Tree t = seedlings.pop_back();
-		trees.push_back(t);
-
-		int x = floor(t.position[0]);
-		int y = floor(t.position[1]);
-		biomass_values[x][y] += TreeMeshFiles[t.growthStage];
-	}
-	
-	// turn VEGETATION into EVAPORATION
-	for(int x = 0; x < TERRAIN_SIZE; ++x) {
-		for (int y = 0; y < TERRAIN_SIZE; ++y) {
-			// updates vapor map
-			evaporation(x, y, biomass_values[x][y]);
-		}
-	}
-}
-
 
 OP_ERROR
 SOP_Lsystem::cookMySop(OP_Context &context)
@@ -249,6 +159,8 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	UT_String grammar;
 	GRAMMAR(now, grammar);
 	LSystem myplant;
+
+	EcoSim eco;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -259,9 +171,9 @@ SOP_Lsystem::cookMySop(OP_Context &context)
     // myplant.setDefaultAngle(30.0f);
     // myplant.setDefaultStep(1.0f);
 
-	myplant.loadProgram(grammar.toStdString());
-	myplant.setDefaultAngle(angle);
-	myplant.setDefaultStep(step);
+
+	eco.setVapor(1.0);
+	eco.setTrees();
 
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -269,12 +181,9 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 	// You the need call the below function for all the generations, so that the end points points will be
 	// stored in the branches vector, you need to declare them first
 
-	std::vector<LSystem::Branch> branches;
 
-	for (int i = 0; i < itr ; i++)
-	{
-		  myplant.process(i, branches);
-	}
+	//eco.cycle();
+
 
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -318,22 +227,21 @@ SOP_Lsystem::cookMySop(OP_Context &context)
         // PUT YOUR CODE HERE
 	    // Build a polygon
 
-		// loop through branches
-		for (int i = 0; i < branches.size(); ++i) {
-			LSystem::Branch b = branches.at(i);
-
-			vec3 s = b.first;
-			vec3 e = b.second;
+		// loop through trees
+		for (int i = 0; i < eco.trees.size(); ++i) {
+			EcoSim::Tree t = eco.trees.at(i);
 
 			UT_Vector3 start;
-			start(xcoord) = s[0];
-			start(ycoord) = s[2];
-			start(zcoord) = s[1];
+			start(xcoord) = t.position[0];
+			start(ycoord) = t.position[1];
+			start(zcoord) = t.position[2];
+
+			float height = EcoSim::TreeMass[t.grothStage];
 
 			UT_Vector3 end;
-			end(xcoord) = e[0];
-			end(ycoord) = e[2];
-			end(zcoord) = e[1];
+			end(xcoord) = t.position[0];
+			end(ycoord) = t.position[1];
+			end(zcoord) = t.position[2] + height;
 
 			poly = GU_PrimPoly::build(gdp, 2, 0, 1);
 
@@ -342,7 +250,6 @@ SOP_Lsystem::cookMySop(OP_Context &context)
 
 			ptoff = poly->getPointOffset(1);
 			gdp->setPos3(ptoff, end);
-
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -361,4 +268,5 @@ SOP_Lsystem::cookMySop(OP_Context &context)
     myCurrPoint = -1;
     return error();
 }
+
 
