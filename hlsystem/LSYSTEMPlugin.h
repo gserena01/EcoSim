@@ -7,6 +7,7 @@
 //
 #include <SOP/SOP_Node.h>
 #include "LSystem.h"
+#include "EcoSim.h"
 
 namespace HDK_Sample {
     class SOP_Lsystem : public SOP_Node
@@ -59,24 +60,24 @@ namespace HDK_Sample {
         // Here you need to declare functions which need to be called from the .C file to 
         // constantly update the cook function, these functions help you get the current value that the node has
         // Example : To declare a function to fetch angle you need to do it this way 
-        fpreal ANGLE(fpreal t) { return evalFloat("angle", 0, t); }
-        fpreal STEP(fpreal t) { return evalFloat("step", 0, t); }
-        fpreal ITER(fpreal t) { return evalInt("iter", 0, t); }
-        UT_String GRAMMAR(fpreal t) {
-            UT_String str;
-            evalString(str, "grammar", 0, t);
-            return str;
-        }
-        fpreal STARTX(fpreal t) { return evalFloat("startX", 0, t); }
-        fpreal STARTY(fpreal t) { return evalFloat("startY", 0, t); }
-        fpreal STARTZ(fpreal t) { return evalFloat("startZ", 0, t); }
-        fpreal WIDTH(fpreal t) { return evalFloat("width", 0, t); }
+        fpreal SOIL(fpreal t) { return evalFloat("soil", 0, t); }
+        fpreal VAPOR(fpreal t) { return evalFloat("vapor", 0, t); }
+        void TREEFILE(fpreal t, UT_String& str) { return evalString(str, "grammar", 0, t); }
+        int ITERATIONS(fpreal t) { return evalInt("iterations", 0, t); }
 
-        UT_String TERRAIN(fpreal t) {
-            UT_String str;
-            evalString(str, "terrain", 0, t);
-            return str;
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         UT_String PLANT1(fpreal t) {
             UT_String str;
