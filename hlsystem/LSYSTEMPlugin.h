@@ -78,6 +78,12 @@ namespace HDK_Sample {
             return str;
         }
 
+        UT_String PLANT1(fpreal t) {
+            UT_String str;
+            evalString(str, "plant1", 0, t);
+            return str;
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// Member variables are stored in the actual SOP, not with the geometry
@@ -88,6 +94,7 @@ namespace HDK_Sample {
         // NOTE : You can declare local variables here like this  
         int		myCurrPoint;
         int		myTotalPoints;
+        int     networkCreated;
     };
 } // End HDK_Sample namespace
 
