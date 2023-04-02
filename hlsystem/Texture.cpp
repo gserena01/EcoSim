@@ -82,16 +82,16 @@ float grayscale(vec3 v) {
     return .3 * v[0], .6 * v[1] + .1 * v[2];
 }
 
-std::vector<std::vector<std::vector<float>>> makeVaporMap(int resolution) {
-    std::vector<std::vector<std::vector<float>>> tex_3d(
-        resolution, std::vector<std::vector<float> >(resolution, std::vector<float>(resolution)));
-    for (int i = 0; i < resolution; ++i) {
-        for (int j = 0; j < resolution; ++j) {
-            for (int k = 0; k < resolution; ++k) {
+std::array<std::array<std::array<float, 4>, 32>, 32> makeVaporMap(int resolution) {
+    std::array<std::array<std::array<float, 4>, 32>, 32> tex_3d = { {{0.0}} };
+    for (int i = 0; i < 32; ++i) {
+        for (int j = 0; j < 32; ++j) {
+            for (int k = 0; k < 4; ++k) {
                 tex_3d[i][j][k] = grayscale(fbm(vec3(1.0 / i, 1.0 / j, 1.0 / k)));
             }
         }
     }
+    return tex_3d;
 }
 
 Texture::Texture(int resolution) {

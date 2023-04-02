@@ -11,6 +11,7 @@
 #include <PRM/PRM_SpareData.h>
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
+#include <OP/OP_Director.h>
 
 #include <limits.h>
 #include "LSYSTEMPlugin.h"
