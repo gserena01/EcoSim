@@ -166,6 +166,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			return error();
 		// set parameters
 		heightfield_file_node->setString(UT_String("`chs(\"../CusEcoSim1/terrain\")`"), CH_STRING_LITERAL, "filename", 0, t);
+		// set parameters
+		heightfield_file_node->setInt("size", 0, 0, 65);
 		// connect the node
 		input = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
 		if (input)
@@ -186,6 +188,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// run creation script
 		if (!heightfield_node->runCreateScript())
 			return error();
+		// set the parameters
+		heightfield_node->setFloat("size", 0, t, 65.0f);
+		heightfield_node->setFloat("size", 1, t, 65.0f);
 		// connect the node
 		input2 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
 		if (input2)
@@ -258,6 +263,28 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		convert_heightfield_node->moveToGoodPosition();
 
+		// (Tree) Group Node
+		OP_Node* group_node;
+		OP_Node* group_input;
+		// create node
+		group_node = parent->createNode("groupcreate", "group1");
+		if (!group_node)
+			return error();
+		// run creation script
+		if (!group_node->runCreateScript())
+			return error();
+		// set parameters
+		group_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		// connect the node
+		group_input = parent->findNode("convertheightfield1");  // find /obj/geo1/heightfield1 as relative path
+		if (group_input)
+		{
+			group_node->setInput(0, group_input);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		group_node->moveToGoodPosition();
+
 		// Scatter node
 		OP_Node* scatter_node;
 		OP_Node* input7;
@@ -268,8 +295,10 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// run creation script
 		if (!scatter_node->runCreateScript())
 			return error();
+		// set parameters
+		scatter_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "group", 0, t);
 		// connect the node
-		input7 = parent->findNode("convertheightfield1");  // find /obj/geo1/convertheightfield1 as relative path
+		input7 = parent->findNode("group1");  // find /obj/geo1/convertheightfield1 as relative path
 		if (input7)
 		{
 			scatter_node->setInput(0, input7);       // set first input to /obj/null1
