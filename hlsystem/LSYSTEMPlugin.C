@@ -41,10 +41,14 @@ newSopOperator(OP_OperatorTable* table)
 //PUT YOUR CODE HERE
 //You need to declare your parameters here
 static PRM_Name terrainName("terrain", "Terrain");
-static PRM_Name		soilName("soil", "Soil Water");
-static PRM_Name		vaporName("vapor", "Vapor Water");
+static PRM_Name	soilName("soil", "Soil Water");
+static PRM_Name	vaporName("vapor", "Vapor Water");
 static PRM_Name	plant1Name("plant1", "Plant1");
-static PRM_Name		iterationName("iterations", "Iterations");
+static PRM_Name	iterationName("iterations", "Iterations");
+static PRM_Name seedName("seedPlacement", "Seed Placement");
+static PRM_Name juvenileName("juvenilePlacement", "Juvenile Tree Placement");
+static PRM_Name matureName("maturePlacement", "Mature Tree Placement");
+static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				     ^^^^^^^^    ^^^^^^^^^^^^^^^
@@ -60,6 +64,10 @@ static PRM_Range iterationRange(PRM_RANGE_UI,  0,
 								PRM_RANGE_UI, 30);
 static PRM_Default terrainDefault(0, "");
 static PRM_Default plant1Default(0, "");
+static PRM_Default seedDefault(0, "");
+static PRM_Default juvenileDefault(0, "");
+static PRM_Default matureDefault(0, "");
+static PRM_Default decayingDefault(0, "");
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -68,11 +76,15 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
-		PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
-		PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &plant1Name, &plant1Default, 0),
+	PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
+	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &plant1Name, &plant1Default, 0),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &seedName, &seedDefault, 0),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &juvenileName, &juvenileDefault, 0),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &matureName, &matureDefault, 0),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &decayingName, &decayingDefault, 0),
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -275,6 +287,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			return error();
 		// set parameters
 		group_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		group_node->setString(UT_String("`chs(\".. / CusEcoSim1 / seedPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
 		// connect the node
 		group_input = parent->findNode("convertheightfield1");  // find /obj/geo1/heightfield1 as relative path
 		if (group_input)
@@ -441,7 +454,30 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 	for (int i = 0; i < itr; ++i) {
 		eco.cycle();
+		printf("CALLED");
 	}
+
+	// get list of trees to render
+	std::string seeds;
+	std::string juveniles;
+	std::string mature;
+	std::string decaying;
+	eco.getTreePositions(seeds, juveniles, mature, decaying);
+
+	OP_Node* custom_node;
+	custom_node = parent->findNode("CusEcoSim1");
+	// set parameters
+	if (custom_node) {
+		custom_node->setString(UT_String(seeds), CH_STRING_LITERAL, "seedPlacement", 0, t);
+		custom_node->setString(UT_String(juveniles), CH_STRING_LITERAL, "juvenilePlacement", 0, t);
+		custom_node->setString(UT_String(mature), CH_STRING_LITERAL, "maturePlacement", 0, t);
+		custom_node->setString(UT_String(decaying), CH_STRING_LITERAL, "decayingPlacement", 0, t);
+	}
+	printf(seeds.c_str());
+	printf(juveniles.c_str());
+	printf(mature.c_str());
+	printf(decaying.c_str());
+	
 
 	///////////////////////////////////////////////////////////////////////////////////
 
