@@ -20,10 +20,11 @@ class EcoSim
 public:
     ////// STATIC GLOBAL VALUES
 
-    // default 32x32x32 cell grid for terrain
+    // default 32x32x4 cell grid for terrain
     // 0x0 is left bottom corner
     // Paper uses ~31x31 cell grid where each grid is 1.5m^2
     const static int TERRAIN_SIZE = 32;
+    const static int TERRAIN_HEIGHT = 4;
 
     // evaporation constance
     constexpr const static float EVAP_CONSTANT = 1.5;
@@ -31,7 +32,7 @@ public:
     // water that a wet climate plant requires to grow
     // all wet climate trees requitrre half their mass in water
     // Only mature trees can decay. Juvenile and seeds will die if they do not receive threshold of water
-    constexpr static const float ABSORB_WET_CLIMATE = 0.05; 
+    constexpr static const float ABSORB_WET_CLIMATE = 0.1;
 
     // transpiration coefficient
     // Paper cites 0.08 for Conifers and 0.16 for Deciduous
@@ -40,20 +41,16 @@ public:
 
     ////// TREE STRUCT INFORMATION
 
-    int treeID;
-
     // Data for tree seed spawn
+    int treeID;
     float theta = 17.0;
-    float seedR = 1.0; // paper cites numbers 1.5 - 2.6
+    float seedR = 2.05; // paper cites numbers 1.5 - 2.6
 
-    //// Tree Growth State
-    // Tree indices
+    //// Tree Growth State INDICES
     const static int SEED = 0;
     const static int JUVENILE = 1;
     const static int MATURE = 2;
-    // DECAY = if absorbed less than threshold of water
     const static int DECAY = 3;
-    // DEAD = to be deleted when displaying
     const static int DEAD = 4;
 
     //// Tree age years -> growth stage
@@ -68,22 +65,23 @@ public:
     constexpr const static float TreeMass[5] = { 0.1, 5.0, 10.0, 7.5, 0.0 };
 
 
-    ////// CLASS FUNCTIONS
+    ////// CLASS FUNCTIONALITY
 
     EcoSim();
 
     void cycle();
 
+    void getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
+        std::string& mature_pos, std::string& decay_pos);
+
     std::vector<Tree> trees;
 
     // SETTERS
-    void setVapor(float v);
     void setTrees();
+    void setVapor(float v);
     void setSoilWater(float s);
-    void setTreesDecayTest();
 
-    // PRINTERS
-    int getAliveTrees();
+    // PRINTERS (for testing)
     void printVapor();
     void printPrecipitation();
     void printSoilWater();
@@ -92,11 +90,16 @@ public:
 
 protected:
 
-    /// Climatic Processes on that grid cell
+    //// Climatic Processes
+    // VAPOR to PRECIPITATION
     void condensation();
+    // PRECIPITATION to SOIL WATER
     void soilWaterDiffusion();
+    // SOIL WATER to BIOMASS and VEGETATION growth
     void absorption();
-    void absorptionReqs();  // Set the amount of water required for the vegetation on a grid cell
+    // Updates water requirements for biomass on that cell
+    void absorptionReqs();
+    // BIOMASS to VAPOR
     void evaporation();
 
     //// Helper Tree functions
@@ -104,28 +107,28 @@ protected:
     void vegetationGrowth(Tree& t, int x, int y);
     // Updates the growth stage of tree based on age
     void increaseGrowthStage(Tree& t);
+    // Spawns a seed into seedling vector
+    void spawnSeed(vec3 parentPos);
     // Pops seedlings into trees vector
     void updateSeeds();
-    // Spawns a seedling in the grid cell
-    void spawnSeed(vec3 parentPos);
+
 
 private:
 
-    bool vaporSet = false;
-    bool soilSet = false;
+    // Must be set to TRUE for cycle to run
     bool treeSet = false;
 
     ///// WATER CYCLE MAP VALUES
 
     // 3D volume of vapor in column
     // assuming information stored, x, y, z (where z is height)
-    std::array<std::array<std::array<float, 4>, 32>, 32> vapor_values;
+    std::array<std::array<std::array<float, TERRAIN_HEIGHT>, TERRAIN_SIZE>, TERRAIN_SIZE> vapor_values;
 
     // amount of rain
     float precipitation_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
 
     // amount of water in the soil
-    float soilWater_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
+    std::array<std::array<float, TERRAIN_SIZE>, TERRAIN_SIZE> soilWater_values;
 
     // how much water the plants on that cell need
     float vegetationNeeds_values[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
