@@ -71,7 +71,7 @@ public:
 
     void cycle();
 
-    void getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
+    std::vector<float> getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
         std::string& mature_pos, std::string& decay_pos);
 
     std::vector<Tree> trees;
