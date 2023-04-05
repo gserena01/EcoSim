@@ -156,19 +156,26 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 {
 	fpreal		 now = context.getTime();
 	float           t = context.getTime();
-	OP_Node* heightfield_file_node;
 	OP_Network* parent;
 	parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
 
-	// PUT YOUR CODE HERE
-	// Decare the necessary variables and get always keep getting the current value in the node
-	// For example to always get the current angle thats set in the node ,you need to :
-	//    float angle;
-	//    angle = ANGLE(now)       
-	//    NOTE : ANGLE is a function that you need to use and it is declared in the header file to update your values instantly while cooking 
-
+	// Create the node network
 	if (networkCreated < 0) {
+		// List of Nodes in the network
 		OP_Node* null_input;
+		OP_Node* heightfield_file_node;
+		OP_Node* heightfield_node;
+		OP_Node* heightfield_noise_node;
+		OP_Node* switch_node;
+		OP_Node* convert_heightfield_node;
+		OP_Node* group_node;
+		OP_Node* scatter_node;
+		OP_Node* file_node;
+		OP_Node* pack_node;
+		OP_Node* copy_to_points_node;
+		OP_Node* merge_node;
+		OP_Node* custom_node;
+
 		// create node
 		heightfield_file_node = parent->createNode("heightfield_file", "heightfield_file1");
 		if (!heightfield_file_node)
@@ -190,7 +197,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		heightfield_file_node->moveToGoodPosition();
 
-		OP_Node* heightfield_node;
 		// create node
 		parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
 		heightfield_node = parent->createNode("heightfield", "heightfield1");
@@ -211,7 +217,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		heightfield_node->moveToGoodPosition();
 
-		OP_Node* heightfield_noise_node;
 		// create node
 		heightfield_noise_node = parent->createNode("heightfield_noise", "heightfield_noise1");
 		if (!heightfield_noise_node)
@@ -228,7 +233,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		heightfield_noise_node->moveToGoodPosition();
 
-		OP_Node* switch_node;
 		// create node
 		switch_node = parent->createNode("switch", "switch1");
 		if (!switch_node)
@@ -248,7 +252,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		switch_node->moveToGoodPosition();
 
-		OP_Node* convert_heightfield_node;
 		// create node
 		convert_heightfield_node = parent->createNode("convertheightfield", "convertheightfield1");
 		if (!convert_heightfield_node)
@@ -266,7 +269,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		convert_heightfield_node->moveToGoodPosition();
 
 		// (Tree) Group Node
-		OP_Node* group_node;
 		// create node
 		group_node = parent->createNode("groupcreate", "group1");
 		if (!group_node)
@@ -287,7 +289,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		group_node->moveToGoodPosition();
 
 		// Scatter node
-		OP_Node* scatter_node;
 		// create node
 		scatter_node = parent->createNode("scatter", "scatter1");
 		if (!scatter_node)
@@ -307,7 +308,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		scatter_node->moveToGoodPosition();
 
 		// File Node
-		OP_Node* file_node;
 		// create node
 		file_node = parent->createNode("file", "file1");
 		if (!file_node)
@@ -327,7 +327,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		file_node->moveToGoodPosition();
 
 		// Pack Node
-		OP_Node* pack_node;
 		// create node
 		pack_node = parent->createNode("pack", "pack1");
 		if (!pack_node)
@@ -345,7 +344,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		pack_node->moveToGoodPosition();
 
 		// Copy to Points Node
-		OP_Node* copy_to_points_node;
 		// create node
 		copy_to_points_node = parent->createNode("copytopoints", "copytopoints1");
 		if (!copy_to_points_node)
@@ -366,7 +364,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		copy_to_points_node->moveToGoodPosition();
 
 		// Merge Node
-		OP_Node* merge_node;
 		// create node
 		merge_node = parent->createNode("merge", "merge1");
 		if (!merge_node)
@@ -388,7 +385,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		
 		// Select the custom node
 		OPgetDirector()->clearPickedItems();
-		OP_Node* custom_node;
 		custom_node = parent->findNode("CusEcoSim1");
 		if (custom_node) {
 			custom_node->setInput(0, merge_node);
