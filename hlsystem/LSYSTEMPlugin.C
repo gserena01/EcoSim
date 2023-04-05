@@ -168,7 +168,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	//    NOTE : ANGLE is a function that you need to use and it is declared in the header file to update your values instantly while cooking 
 
 	if (networkCreated < 0) {
-		OP_Node* input;
+		OP_Node* null_input;
 		// create node
 		heightfield_file_node = parent->createNode("heightfield_file", "heightfield_file1");
 		if (!heightfield_file_node)
@@ -181,17 +181,16 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// set parameters
 		heightfield_file_node->setInt("size", 0, 0, 65);
 		// connect the node
-		input = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
-		if (input)
+		null_input = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
+		if (null_input)
 		{
-			heightfield_file_node->setInput(0, input);       // set first input to /obj/null1
+			heightfield_file_node->setInput(0, null_input);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
 		heightfield_file_node->moveToGoodPosition();
 
 		OP_Node* heightfield_node;
-		OP_Node* input2;
 		// create node
 		parent = (OP_Network*)OPgetDirector()->findNode("/obj/geo1");
 		heightfield_node = parent->createNode("heightfield", "heightfield1");
@@ -204,17 +203,15 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		heightfield_node->setFloat("size", 0, t, 65.0f);
 		heightfield_node->setFloat("size", 1, t, 65.0f);
 		// connect the node
-		input2 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
-		if (input2)
+		if (null_input)
 		{
-			heightfield_node->setInput(0, input2);       // set first input to /obj/null1
+			heightfield_node->setInput(0, null_input);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
 		heightfield_node->moveToGoodPosition();
 
 		OP_Node* heightfield_noise_node;
-		OP_Node* input3;
 		// create node
 		heightfield_noise_node = parent->createNode("heightfield_noise", "heightfield_noise1");
 		if (!heightfield_noise_node)
@@ -223,18 +220,15 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!heightfield_noise_node->runCreateScript())
 			return error();
 		// connect the node
-		input3 = parent->findNode("heightfield1");  // find /obj/geo1/heightfield1 as relative path
-		if (input3)
+		if (heightfield_node)
 		{
-			heightfield_noise_node->setInput(0, input3);       // set first input to /obj/null1
+			heightfield_noise_node->setInput(0, heightfield_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
 		heightfield_noise_node->moveToGoodPosition();
 
 		OP_Node* switch_node;
-		OP_Node* input4;
-		OP_Node* input5;
 		// create node
 		switch_node = parent->createNode("switch", "switch1");
 		if (!switch_node)
@@ -243,21 +237,18 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!switch_node->runCreateScript())
 			return error();
 		// connect the node
-		input4 = parent->findNode("heightfield_noise1");  // find /obj/geo1/heightfield1 as relative path
-		input5 = parent->findNode("heightfield_file1");
-		if (input4)
+		if (heightfield_noise_node)
 		{
-			switch_node->setInput(0, input4);       // set first input to /obj/null1
+			switch_node->setInput(0, heightfield_noise_node);       // set first input to /obj/null1
 		}
-		if (input5) {
-			switch_node->setInput(1, input5);
+		if (heightfield_file_node) {
+			switch_node->setInput(1, heightfield_file_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
 		switch_node->moveToGoodPosition();
 
 		OP_Node* convert_heightfield_node;
-		OP_Node* input6;
 		// create node
 		convert_heightfield_node = parent->createNode("convertheightfield", "convertheightfield1");
 		if (!convert_heightfield_node)
@@ -266,10 +257,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!convert_heightfield_node->runCreateScript())
 			return error();
 		// connect the node
-		input6 = parent->findNode("switch1");  // find /obj/geo1/heightfield1 as relative path
-		if (input6)
+		if (switch_node)
 		{
-			convert_heightfield_node->setInput(0, input6);       // set first input to /obj/null1
+			convert_heightfield_node->setInput(0, switch_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -277,7 +267,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// (Tree) Group Node
 		OP_Node* group_node;
-		OP_Node* group_input;
 		// create node
 		group_node = parent->createNode("groupcreate", "group1");
 		if (!group_node)
@@ -287,12 +276,11 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			return error();
 		// set parameters
 		group_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "groupname", 0, t);
-		group_node->setString(UT_String("`chs(\".. / CusEcoSim1 / seedPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
+		group_node->setString(UT_String("`chs(\"../CusEcoSim1/seedPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
 		// connect the node
-		group_input = parent->findNode("convertheightfield1");  // find /obj/geo1/heightfield1 as relative path
-		if (group_input)
+		if (convert_heightfield_node)
 		{
-			group_node->setInput(0, group_input);       // set first input to /obj/null1
+			group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -300,7 +288,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// Scatter node
 		OP_Node* scatter_node;
-		OP_Node* input7;
 		// create node
 		scatter_node = parent->createNode("scatter", "scatter1");
 		if (!scatter_node)
@@ -311,10 +298,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// set parameters
 		scatter_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "group", 0, t);
 		// connect the node
-		input7 = parent->findNode("group1");  // find /obj/geo1/convertheightfield1 as relative path
-		if (input7)
+		if (group_node)
 		{
-			scatter_node->setInput(0, input7);       // set first input to /obj/null1
+			scatter_node->setInput(0, group_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -322,7 +308,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// File Node
 		OP_Node* file_node;
-		OP_Node* input8;
 		// create node
 		file_node = parent->createNode("file", "file1");
 		if (!file_node)
@@ -333,10 +318,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// set parameters
 		file_node->setString(UT_String("`chs(\"../CusEcoSim1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
 		// connect the node
-		input8 = parent->findNode("null1");  // find /obj/geo1/null1 as relative path
-		if (input8)
+		if (null_input)
 		{
-			file_node->setInput(0, input8);       // set first input to /obj/null1
+			file_node->setInput(0, null_input);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -344,7 +328,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// Pack Node
 		OP_Node* pack_node;
-		OP_Node* input9;
 		// create node
 		pack_node = parent->createNode("pack", "pack1");
 		if (!pack_node)
@@ -353,10 +336,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!pack_node->runCreateScript())
 			return error();
 		// connect the node
-		input9 = parent->findNode("file1");  // find /obj/geo1/null1 as relative path
-		if (input9)
+		if (file_node)
 		{
-			pack_node->setInput(0, input9);       // set first input to /obj/null1
+			pack_node->setInput(0, file_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -364,8 +346,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// Copy to Points Node
 		OP_Node* copy_to_points_node;
-		OP_Node* input10;
-		OP_Node* input11;
 		// create node
 		copy_to_points_node = parent->createNode("copytopoints", "copytopoints1");
 		if (!copy_to_points_node)
@@ -374,14 +354,12 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		input10 = parent->findNode("pack1");  // find /obj/geo1/null1 as relative path
-		input11 = parent->findNode("scatter1");
-		if (input10)
+		if (pack_node)
 		{
-			copy_to_points_node->setInput(0, input10);       // set first input to /obj/null1
+			copy_to_points_node->setInput(0, pack_node);       // set first input to /obj/null1
 		}
-		if (input11) {
-			copy_to_points_node->setInput(1, input11);
+		if (scatter_node) {
+			copy_to_points_node->setInput(1, scatter_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -389,8 +367,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// Merge Node
 		OP_Node* merge_node;
-		OP_Node* input12;
-		OP_Node* input13;
 		// create node
 		merge_node = parent->createNode("merge", "merge1");
 		if (!merge_node)
@@ -398,18 +374,13 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// run creation script
 		if (!merge_node->runCreateScript())
 			return error();
-		//set parameters
-		merge_node->setRender(true);
-		merge_node->setDisplay(true);
 		// connect the node
-		input12 = parent->findNode("switch1");  // find /obj/geo1/null1 as relative path
-		input13 = parent->findNode("copytopoints1");
-		if (input12)
+		if (switch_node)
 		{
-			merge_node->setInput(0, input12);       // set first input to /obj/null1
+			merge_node->setInput(0, switch_node);       // set first input to /obj/null1
 		}
-		if (input13) {
-			merge_node->setInput(1, input13);
+		if (copy_to_points_node) {
+			merge_node->setInput(1, copy_to_points_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -420,41 +391,26 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		OP_Node* custom_node;
 		custom_node = parent->findNode("CusEcoSim1");
 		if (custom_node) {
+			custom_node->setInput(0, merge_node);
 			custom_node->pickRequest(true);
+			custom_node->moveToGoodPosition();
 		}
 
 		networkCreated = 1;
 	}
 
+	// gather parameters from GUI
 	std::string terrainFile = TERRAIN(now).toStdString();
 	std::string plant1File = PLANT1(now).toStdString();
 	float soil = SOIL(now);
 	float vapor = VAPOR(now);
 	int itr = ITERATIONS(now);
 
+	// update eco simulation
 	EcoSim eco;
-
-	///////////////////////////////////////////////////////////////////////////
-
-	//PUT YOUR CODE HERE
-	// Next you need to call your Lystem cpp functions 
-	// Below is an example , you need to call the same functions based on the variables you declare
-	// myplant.loadProgramFromString("F\nF->F[+F]F[-F]";  
-	// myplant.setDefaultAngle(30.0f);
-	// myplant.setDefaultStep(1.0f);
-
 	eco.setTrees();
-
-
-	///////////////////////////////////////////////////////////////////////////////
-
-	// PUT YOUR CODE HERE
-	// You the need call the below function for all the generations, so that the end points points will be
-	// stored in the branches vector, you need to declare them first
-
 	for (int i = 0; i < itr; ++i) {
-		eco.cycle();
-		printf("CALLED");
+			eco.cycle();
 	}
 
 	// get list of trees to render
@@ -463,41 +419,31 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string mature;
 	std::string decaying;
 	eco.getTreePositions(seeds, juveniles, mature, decaying);
+	
+	// Update node parameters that changed during iteration:
+	OP_Node* group_node;
+	group_node = parent->findNode("group1");
+	group_node->setString(UT_String(seeds + juveniles + mature + decaying), CH_STRING_LITERAL, "basegroup", 0, t);
 
-	OP_Node* custom_node;
-	custom_node = parent->findNode("CusEcoSim1");
-	// set parameters
-	if (custom_node) {
-		custom_node->setString(UT_String(seeds), CH_STRING_LITERAL, "seedPlacement", 0, t);
-		custom_node->setString(UT_String(juveniles), CH_STRING_LITERAL, "juvenilePlacement", 0, t);
-		custom_node->setString(UT_String(mature), CH_STRING_LITERAL, "maturePlacement", 0, t);
-		custom_node->setString(UT_String(decaying), CH_STRING_LITERAL, "decayingPlacement", 0, t);
-	}
 	printf(seeds.c_str());
 	printf(juveniles.c_str());
 	printf(mature.c_str());
 	printf(decaying.c_str());
-	
-
-	///////////////////////////////////////////////////////////////////////////////////
-
-	// Now that you have all the branches, which is the start and end point of each point, its time to render 
-	// these branches into Houdini 
+	// 1. Lock inputs, causes them to be cooked first.
+	if (lockInputs(context) >= UT_ERROR_ABORT)
+		return error();
+	// 2. Copy input geometry into our gdp
+	duplicateSource(0, context);
+	// 3. Parse and create myGroup
+	if (cookInputGroups(context) >= UT_ERROR_ABORT)
+		return error();
+	// 4. Unlock inputs
+	unlockInputs();
 
 	// PUT YOUR CODE HERE 
-	// Declare all the necessary variables for drawing cylinders for each branch 
-	float		 rad, tx, ty, tz;
-	int			 divisions, plane;
-	int			 xcoord = 0, ycoord = 1, zcoord = 2;
-	float		 tmp;
-	UT_Vector4		 pos;
-	GU_PrimPoly* poly;
-	int			 i;
 	UT_Interrupt* boss;
 
-	// Since we don't have inputs, we don't need to lock them.
-
-	divisions = 5;	// We need twice our divisions of points
+	int divisions = 5;	// We need twice our divisions of points
 	myTotalPoints = divisions;		// Set the NPT local variable value
 	myCurrPoint = 0;			// Initialize the PT local variable
 
@@ -514,48 +460,10 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			divisions = 4;
 		}
 
-		// Maybe comment out, maybe not? ~SERENA
-		gdp->clearAndDestroy();
-
 		// Start the interrupt server
 		if (boss->opStart("Building LSYSTEM"))
 		{
-			// PUT YOUR CODE HERE
-			// Build a polygon
-
-			// loop through branches
-			for (int i = 0; i < eco.trees.size(); ++i) {
-				Tree t = eco.trees.at(i);
-
-				vec3 p = t.position;
-				float h = eco.TreeMass[t.growthStage];
-
-				UT_Vector3 start;
-				start(xcoord) = p[0];
-				start(ycoord) = p[2];
-				start(zcoord) = p[1];
-
-				UT_Vector3 end;
-				end(xcoord) = p[0];
-				end(ycoord) = p[2] + h;
-				end(zcoord) = p[1];
-
-				poly = GU_PrimPoly::build(gdp, 2, 0, 1);
-
-				GA_Offset ptoff = poly->getPointOffset(0);
-				gdp->setPos3(ptoff, start);
-
-				ptoff = poly->getPointOffset(1);
-				gdp->setPos3(ptoff, end);
-
-			}
-
-			////////////////////////////////////////////////////////////////////////////////////////////
-
-			// Highlight the star which we have just generated.  This routine
-			// call clears any currently highlighted geometry, and then it
-			// highlights every primitive for this SOP. 
-			select(GU_SPrimitive);
+			
 		}
 
 		// Tell the interrupt server that we've completed. Must do this
