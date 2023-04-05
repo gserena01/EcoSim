@@ -90,11 +90,13 @@ void EcoSim::cycle()
 }
 
 
-void EcoSim::getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
+std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
     std::string& mature_pos, std::string& decay_pos) {
     // Updates the given strings with numbers of the new tree positions for display
     // Ex: tree at 0,0 = 0 ; tree at 31,31 = 1023
     // Output strings in the form "0 1 2 3"
+    // Returns vector of num of each tree age 
+    // ie treenum[0] = 2 means there are 2 seed trees
 
     // empty the strings
     seed_pos = "";
@@ -102,27 +104,44 @@ void EcoSim::getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
     mature_pos = "";
     decay_pos = "";
 
+    // counters
+    float numS = 0;
+    float numJ = 0;
+    float numM = 0;
+    float numD = 0;
+
     // populate position strings
     for (Tree& t : trees) {
         int pos = int(TERRAIN_SIZE * t.position[0] + t.position[1]);
         if (t.growthStage == SEED) {
+            numS+=1.0;
             seed_pos.append(std::to_string(pos));
             seed_pos.push_back(' ');
         }
         else if (t.growthStage == JUVENILE) {
+            numJ+=1.0;
             juvenile_pos.append(std::to_string(pos));
             juvenile_pos.push_back(' ');
         }
         else if (t.growthStage == MATURE) {
+            numM+=1.0;
             mature_pos.append(std::to_string(pos));
             mature_pos.push_back(' ');
         }
         else if (t.growthStage == DECAY) {
+            numD+=1.0;
             decay_pos.append(std::to_string(pos));
             decay_pos.push_back(' ');
         }
     }
 
+    std::vector<float> treenum;
+    treenum.push_back(numS);
+    treenum.push_back(numJ);
+    treenum.push_back(numM);
+    treenum.push_back(numD);
+
+    return treenum;
 }
 
 //// CLIMATIC PROCESSES
