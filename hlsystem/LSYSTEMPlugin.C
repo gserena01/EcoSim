@@ -298,6 +298,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			return error();
 		// set parameters
 		scatter_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "group", 0, t);
+		scatter_node->setInt("generateby", 0, t, 1);
+		scatter_node->setInt("primcountattrib", 0, t, 1);
+
 		// connect the node
 		if (group_node)
 		{
@@ -421,10 +424,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	group_node = parent->findNode("group1");
 	group_node->setString(UT_String(seeds + juveniles + mature + decaying), CH_STRING_LITERAL, "basegroup", 0, t);
 
-	printf(seeds.c_str());
-	printf(juveniles.c_str());
-	printf(mature.c_str());
-	printf(decaying.c_str());
 	// 1. Lock inputs, causes them to be cooked first.
 	if (lockInputs(context) >= UT_ERROR_ABORT)
 		return error();
