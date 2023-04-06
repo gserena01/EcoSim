@@ -41,10 +41,8 @@ newSopOperator(OP_OperatorTable* table)
 //PUT YOUR CODE HERE
 //You need to declare your parameters here
 static PRM_Name terrainName("terrain", "Terrain");
-static PRM_Name		soilName("soil", "Soil Water");
-static PRM_Name		vaporName("vapor", "Vapor Water");
 static PRM_Name	plant1Name("plant1", "Plant1");
-static PRM_Name		iterationName("iterations", "Iterations");
+static PRM_Name		iterationName("years", "Years");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				     ^^^^^^^^    ^^^^^^^^^^^^^^^
@@ -53,8 +51,6 @@ static PRM_Name		iterationName("iterations", "Iterations");
 
 // PUT YOUR CODE HERE
 // You need to setup the initial/default values for your parameters here
-static PRM_Default soilDefault(1.0);
-static PRM_Default vaporDefault(1.0);
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
 								PRM_RANGE_UI, 30);
@@ -70,8 +66,6 @@ SOP_Lsystem::myTemplateList[] = {
 	// You now need to fill this template with your parameter name and their default value
 		PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
 		PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &plant1Name, &plant1Default, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -386,9 +380,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 	std::string terrainFile = TERRAIN(now).toStdString();
 	std::string plant1File = PLANT1(now).toStdString();
-	float soil = SOIL(now);
-	float vapor = VAPOR(now);
-	int itr = ITERATIONS(now);
+	int itr = YEARS(now);
 
 	EcoSim eco;
 

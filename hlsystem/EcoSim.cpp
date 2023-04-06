@@ -112,7 +112,7 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
 
     // populate position strings
     for (Tree& t : trees) {
-        int pos = int(TERRAIN_SIZE * t.position[0] + t.position[1]);
+        int pos = int(TERRAIN_SIZE * t.position[1] + t.position[0]);
         if (t.growthStage == SEED) {
             numS+=1.0;
             seed_pos.append(std::to_string(pos));
