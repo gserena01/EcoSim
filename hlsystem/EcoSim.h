@@ -77,9 +77,10 @@ public:
     std::vector<Tree> trees;
 
     // SETTERS
-    void setTrees();
-    void setVapor(float v);
-    void setSoilWater(float s);
+    void setTreesManual();
+    void setTreesNoise();
+    void setVaporManual(float v);
+    void setSoilWaterManual(float s);
 
     // PRINTERS (for testing)
     void printVapor();

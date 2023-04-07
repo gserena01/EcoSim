@@ -393,8 +393,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// myplant.setDefaultAngle(30.0f);
 	// myplant.setDefaultStep(1.0f);
 
-	eco.setTrees();
-
+	eco.setTreesNoise();
 
 	///////////////////////////////////////////////////////////////////////////////
 

@@ -10,7 +10,7 @@ EcoSim::EcoSim()
     // trees must be set before you can begin cycle
 }
 
-void EcoSim::setVapor(float v) {
+void EcoSim::setVaporManual(float v) {
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
         for (int y = 0; y < TERRAIN_SIZE; ++y) {
             for (int z = 0; z < 4; ++z) {
@@ -20,7 +20,7 @@ void EcoSim::setVapor(float v) {
     }
 }
 
-void EcoSim::setSoilWater(float s) {
+void EcoSim::setSoilWaterManual(float s) {
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
         for (int y = 0; y < TERRAIN_SIZE; ++y) {
             soilWater_values[x][y] = s;
@@ -28,7 +28,7 @@ void EcoSim::setSoilWater(float s) {
     }
 }
 
-void EcoSim::setTrees() {
+void EcoSim::setTreesManual() {
     // TODO: pull from existing starter trees on terrain
     // sets trees vector, biomass map, vegetationNeeds map
     treeSet = true;
@@ -57,6 +57,32 @@ void EcoSim::setTrees() {
     }
     // set vegetationNeeds
     absorptionReqs();
+}
+
+void::EcoSim::setTreesNoise() {
+    treeSet = true;
+
+    for (int x = 0; x < TERRAIN_SIZE; x++) {
+        for (int y = 0; x < TERRAIN_SIZE; y++) {
+            float w = soilWater_values[x][y];
+            Tree t;
+            t.position = vec3(x, y, 0.0);
+            t.id = treeID++;
+            if (w > 0.7 && w < 1.3) {
+                t.growthStage == SEED;
+                t.age == std::round((w-0.5));
+            }
+            else if (w >= 1.3 && w < 2.5) {
+                t.growthStage == JUVENILE;
+                t.age = std::round((w - 1.3) * 2.91 + 2.0);
+            }
+            else if (w >= 2.5) {
+                t.growthStage == MATURE;
+                t.age = std::round((w-0.5)*5.0);
+            }
+            trees.push_back(t);
+        }
+    }
 }
 
 
