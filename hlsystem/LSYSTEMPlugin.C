@@ -168,11 +168,12 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		OP_Node* heightfield_noise_node;
 		OP_Node* switch_node;
 		OP_Node* convert_heightfield_node;
-		OP_Node* group_node;
-		OP_Node* scatter_node;
-		OP_Node* file_node;
-		OP_Node* pack_node;
-		OP_Node* copy_to_points_node;
+		OP_Node* seed_group_node;
+		OP_Node* seed_scatter_node;
+		OP_Node* seed_file_node;
+		OP_Node* seed_pack_node;
+		OP_Node* seed_copy_to_points_node;
+		OP_Node* color_node;
 		OP_Node* merge_node;
 		OP_Node* custom_node;
 
@@ -224,6 +225,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// run creation script
 		if (!heightfield_noise_node->runCreateScript())
 			return error();
+		heightfield_noise_node->setFloat("amp", 0, t, 20.0f);
+		heightfield_noise_node->setFloat("elementsize", 0, t, 20.0f);
 		// connect the node
 		if (heightfield_node)
 		{
@@ -270,101 +273,125 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 		// (Tree) Group Node
 		// create node
-		group_node = parent->createNode("groupcreate", "group1");
-		if (!group_node)
+		seed_group_node = parent->createNode("groupcreate", "group1");
+		if (!seed_group_node)
 			return error();
 		// run creation script
-		if (!group_node->runCreateScript())
+		if (!seed_group_node->runCreateScript())
 			return error();
 		// set parameters
-		group_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "groupname", 0, t);
-		group_node->setString(UT_String("`chs(\"../CusEcoSim1/seedPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
+		seed_group_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		seed_group_node->setString(UT_String("`chs(\"../CusEcoSim1/seedPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
 		// connect the node
 		if (convert_heightfield_node)
 		{
-			group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
+			seed_group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
-		group_node->moveToGoodPosition();
+		seed_group_node->moveToGoodPosition();
 
 		// Scatter node
 		// create node
-		scatter_node = parent->createNode("scatter", "scatter1");
-		if (!scatter_node)
+		seed_scatter_node = parent->createNode("scatter", "scatter1");
+		if (!seed_scatter_node)
 			return error();
 		// run creation script
-		if (!scatter_node->runCreateScript())
+		if (!seed_scatter_node->runCreateScript())
 			return error();
 		// set parameters
-		scatter_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "group", 0, t);
-		scatter_node->setInt("generateby", 0, t, 1);
-		scatter_node->setInt("primcountattrib", 0, t, 1);
+		seed_scatter_node->setString(UT_String("treegroup"), CH_STRING_LITERAL, "group", 0, t);
+		seed_scatter_node->setInt("generateby", 0, t, 1);
+		seed_scatter_node->setInt("primcountattrib", 0, t, 1);
 
 		// connect the node
-		if (group_node)
+		if (seed_group_node)
 		{
-			scatter_node->setInput(0, group_node);       // set first input to /obj/null1
+			seed_scatter_node->setInput(0, seed_group_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
-		scatter_node->moveToGoodPosition();
+		seed_scatter_node->moveToGoodPosition();
 
 		// File Node
 		// create node
-		file_node = parent->createNode("file", "file1");
-		if (!file_node)
+		seed_file_node = parent->createNode("file", "file1");
+		if (!seed_file_node)
 			return error();
 		// run creation script
-		if (!file_node->runCreateScript())
+		if (!seed_file_node->runCreateScript())
 			return error();
 		// set parameters
-		file_node->setString(UT_String("`chs(\"../CusEcoSim1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
+		seed_file_node->setString(UT_String("`chs(\"../CusEcoSim1/plant1\")`"), CH_STRING_LITERAL, "file", 0, t);
 		// connect the node
 		if (null_input)
 		{
-			file_node->setInput(0, null_input);       // set first input to /obj/null1
+			seed_file_node->setInput(0, null_input);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
-		file_node->moveToGoodPosition();
+		seed_file_node->moveToGoodPosition();
 
 		// Pack Node
 		// create node
-		pack_node = parent->createNode("pack", "pack1");
-		if (!pack_node)
+		seed_pack_node = parent->createNode("pack", "pack1");
+		if (!seed_pack_node)
 			return error();
 		// run creation script
-		if (!pack_node->runCreateScript())
+		if (!seed_pack_node->runCreateScript())
 			return error();
 		// connect the node
-		if (file_node)
+		if (seed_file_node)
 		{
-			pack_node->setInput(0, file_node);       // set first input to /obj/null1
+			seed_pack_node->setInput(0, seed_file_node);       // set first input to /obj/null1
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
-		pack_node->moveToGoodPosition();
+		seed_pack_node->moveToGoodPosition();
 
 		// Copy to Points Node
 		// create node
-		copy_to_points_node = parent->createNode("copytopoints", "copytopoints1");
-		if (!copy_to_points_node)
+		seed_copy_to_points_node = parent->createNode("copytopoints", "copytopoints1");
+		if (!seed_copy_to_points_node)
 			return error();
 		// run creation script
-		if (!copy_to_points_node->runCreateScript())
+		if (!seed_copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		if (pack_node)
+		if (seed_pack_node)
 		{
-			copy_to_points_node->setInput(0, pack_node);       // set first input to /obj/null1
+			seed_copy_to_points_node->setInput(0, seed_pack_node);       // set first input to /obj/null1
 		}
-		if (scatter_node) {
-			copy_to_points_node->setInput(1, scatter_node);
+		if (seed_scatter_node) {
+			seed_copy_to_points_node->setInput(1, seed_scatter_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
-		copy_to_points_node->moveToGoodPosition();
+		seed_copy_to_points_node->moveToGoodPosition();
+
+		// Color Node
+		color_node = parent->createNode("color", "color1");
+		if (!color_node)
+			return error();
+		if (!color_node->runCreateScript())
+			return error();
+		color_node->setInt("colortype", 0, t, 3);
+		color_node->setString(UT_String("height"), CH_STRING_LITERAL, "rampattribute", 0, t);
+		color_node->setString(UT_String("@height.min"), CH_STRING_LITERAL, "ramprange", 0, t);
+		color_node->setString(UT_String("@height.max"), CH_STRING_LITERAL, "ramprange", 1, t);
+
+		color_node->setFloat("ramp1c", 0, t, 0.075f);
+		color_node->setFloat("ramp1c", 1, t, 0.3f);
+		color_node->setFloat("ramp1c", 2, t, 0.075f);
+
+		color_node->setFloat("ramp2c", 0, t, 0.3f);
+		color_node->setFloat("ramp2c", 1, t, 0.1875f);
+		color_node->setFloat("ramp2c", 2, t, 0.075f);
+		if (convert_heightfield_node)
+		{
+			color_node->setInput(0, convert_heightfield_node);
+		}
+		color_node->moveToGoodPosition();
 
 		// Merge Node
 		// create node
@@ -375,12 +402,12 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!merge_node->runCreateScript())
 			return error();
 		// connect the node
-		if (switch_node)
+		if (color_node)
 		{
-			merge_node->setInput(0, switch_node);       // set first input to /obj/null1
+			merge_node->setInput(0, color_node);       // set first input to /obj/null1
 		}
-		if (copy_to_points_node) {
-			merge_node->setInput(1, copy_to_points_node);
+		if (seed_copy_to_points_node) {
+			merge_node->setInput(1, seed_copy_to_points_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -395,6 +422,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			custom_node->moveToGoodPosition();
 		}
 
+		printf("\nWELCOME TO THE ECOSIM PLUGIN!\nPlease select a terrain image and four different tree growth geometry files");
 		networkCreated = 1;
 	}
 
@@ -420,9 +448,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	eco.getTreePositions(seeds, juveniles, mature, decaying);
 	
 	// Update node parameters that changed during iteration:
-	OP_Node* group_node;
-	group_node = parent->findNode("group1");
-	group_node->setString(UT_String(seeds + juveniles + mature + decaying), CH_STRING_LITERAL, "basegroup", 0, t);
+	OP_Node* seed_group_node;
+	seed_group_node = parent->findNode("group1");
+	seed_group_node->setString(UT_String(seeds + juveniles + mature + decaying), CH_STRING_LITERAL, "basegroup", 0, t);
 
 	// 1. Lock inputs, causes them to be cooked first.
 	if (lockInputs(context) >= UT_ERROR_ABORT)
