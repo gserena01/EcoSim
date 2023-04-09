@@ -64,9 +64,9 @@ namespace HDK_Sample {
         fpreal VAPOR(fpreal t) { return evalFloat("vapor", 0, t); }
         int ITERATIONS(fpreal t) { return evalInt("iterations", 0, t); }
 
-        UT_String PLANT1(fpreal t) {
+        UT_String SEEDGEO(fpreal t) {
             UT_String str;
-            evalString(str, "plant1", 0, t);
+            evalString(str, "seedgeo", 0, t);
             return str;
         }
         UT_String TERRAIN(fpreal t) {
