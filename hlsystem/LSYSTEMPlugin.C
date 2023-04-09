@@ -85,10 +85,7 @@ SOP_Lsystem::myTemplateList[] = {
 	// You now need to fill this template with your parameter name and their default value
 
 	PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
-  
-  PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
+	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &juvenilegeoName, &juvenilegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &maturegeoName, &maturegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &decayinggeoName, &decayinggeoDefault, 0),
@@ -765,13 +762,11 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string terrainFile = TERRAIN(now).toStdString();
 	std::string seedgeoFile = SEEDGEO(now).toStdString();
 
-	float soil = SOIL(now);
-	float vapor = VAPOR(now);
 	int itr = YEARS(now);
 
 	// update eco simulation
 	EcoSim eco;
-  eco.setTreesNoise();
+	eco.setTreesNoise();
 
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
@@ -783,7 +778,15 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string mature;
 	std::string decaying;
 	eco.getTreePositions(seeds, juveniles, mature, decaying);
-	
+	printf(("\nSEEDS: "));
+	printf(seeds.c_str());
+	printf(("\nJUV: "));
+	printf(juveniles.c_str());
+	printf(("\nMATURE: "));
+	printf(mature.c_str());
+	printf(("\nDECAY: "));
+	printf(decaying.c_str());
+
 	// Update node parameters that changed during iteration:
 	OP_Node* seed_group_node;
 	seed_group_node = parent->findNode("seedgroup");

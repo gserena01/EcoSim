@@ -63,7 +63,7 @@ void::EcoSim::setTreesNoise() {
     treeSet = true;
 
     for (int x = 0; x < TERRAIN_SIZE; x++) {
-        for (int y = 0; x < TERRAIN_SIZE; y++) {
+        for (int y = 0; y < TERRAIN_SIZE; y++) {
             float w = soilWater_values[x][y];
             Tree t;
             t.position = vec3(x, y, 0.0);
@@ -79,6 +79,10 @@ void::EcoSim::setTreesNoise() {
             else if (w >= 2.5) {
                 t.growthStage == MATURE;
                 t.age = std::round((w-0.5)*5.0);
+            }
+            else { // we need to catch the cases outside those above since they are not exhaustive
+                t.growthStage == DECAY;
+                t.age = std::round((w - 0.5) * 7.5);
             }
             trees.push_back(t);
         }
@@ -207,6 +211,8 @@ void EcoSim::absorption() {
             int x = floor(t.position[0]);
             int y = floor(t.position[1]);
             vegetationGrowth(t, x, y);
+            std::cout << "(" << x << ", " << y << ")" << std::endl;
+            std::cout << "GROWTH STAGE: " << t.growthStage << std::endl;
             new_biomass[x][y] += TreeMass[t.growthStage];
         }
     }
