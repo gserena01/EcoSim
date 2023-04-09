@@ -60,9 +60,7 @@ namespace HDK_Sample {
         // Here you need to declare functions which need to be called from the .C file to 
         // constantly update the cook function, these functions help you get the current value that the node has
         // Example : To declare a function to fetch angle you need to do it this way 
-        fpreal SOIL(fpreal t) { return evalFloat("soil", 0, t); }
-        fpreal VAPOR(fpreal t) { return evalFloat("vapor", 0, t); }
-        int ITERATIONS(fpreal t) { return evalInt("iterations", 0, t); }
+        int YEARS(fpreal t) { return evalInt("years", 0, t); }
 
         UT_String SEEDGEO(fpreal t) {
             UT_String str;

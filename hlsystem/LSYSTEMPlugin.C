@@ -38,20 +38,23 @@ newSopOperator(OP_OperatorTable* table)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//PUT YOUR CODE HERE
-//You need to declare your parameters here
+// Declare your parameters here
 static PRM_Name terrainName("terrain", "Terrain");
 static PRM_Name	soilName("soil", "Soil Water");
 static PRM_Name	vaporName("vapor", "Vapor Water");
+
 static PRM_Name	seedgeoName("seedgeo", "Seed Geometry");
 static PRM_Name	juvenilegeoName("juvenilegeo", "Juvenile Geometry");
 static PRM_Name	maturegeoName("maturegeo", "Mature Geometry");
 static PRM_Name	decayinggeoName("decayinggeo", "Decaying Geometry");
-static PRM_Name	iterationName("iterations", "Iterations");
+
 static PRM_Name seedName("seedPlacement", "Seed Placement");
 static PRM_Name juvenileName("juvenilePlacement", "Juvenile Tree Placement");
 static PRM_Name matureName("maturePlacement", "Mature Tree Placement");
 static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
+
+static PRM_Name		iterationName("years", "Years");
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				     ^^^^^^^^    ^^^^^^^^^^^^^^^
@@ -60,8 +63,6 @@ static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 
 // PUT YOUR CODE HERE
 // You need to setup the initial/default values for your parameters here
-static PRM_Default soilDefault(1.0);
-static PRM_Default vaporDefault(1.0);
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
 								PRM_RANGE_UI, 30);
@@ -82,13 +83,16 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
+
 	PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
-	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
+	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
+	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
+  
+  PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &juvenilegeoName, &juvenilegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &maturegeoName, &maturegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &decayinggeoName, &decayinggeoDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &soilName, &soilDefault, 0),
-	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &vaporName, &vaporDefault, 0),
+
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &seedName, &seedDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &juvenileName, &juvenileDefault, 0),
@@ -763,11 +767,12 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 	float soil = SOIL(now);
 	float vapor = VAPOR(now);
-	int itr = ITERATIONS(now);
+	int itr = YEARS(now);
 
 	// update eco simulation
 	EcoSim eco;
-	eco.setTrees();
+  eco.setTreesNoise();
+
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
 	}
