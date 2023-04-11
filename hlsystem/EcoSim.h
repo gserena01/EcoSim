@@ -44,7 +44,7 @@ public:
     // Data for tree seed spawn
     int treeID;
     float theta = 17.0;
-    float seedR = 2.05; // paper cites numbers 1.5 - 2.6
+    float seedR = 2.6; // paper cites numbers 1.5 - 2.6
 
     //// Tree Growth State INDICES
     const static int SEED = 0;
