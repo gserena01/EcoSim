@@ -69,22 +69,20 @@ void::EcoSim::setTreesNoise() {
             t.position = vec3(x, y, 0.0);
             t.id = treeID++;
             if (w > 0.7 && w < 1.3) {
-                t.growthStage == SEED;
-                t.age == std::round((w-0.5));
+                t.growthStage = SEED;
+                t.age = std::round((w-0.5));
+                trees.push_back(t);
             }
             else if (w >= 1.3 && w < 2.5) {
-                t.growthStage == JUVENILE;
+                t.growthStage = JUVENILE;
                 t.age = std::round((w - 1.3) * 2.91 + 2.0);
+                trees.push_back(t);
             }
             else if (w >= 2.5) {
-                t.growthStage == MATURE;
+                t.growthStage = MATURE;
                 t.age = std::round((w-0.5)*5.0);
+                trees.push_back(t);
             }
-            else { // we need to catch the cases outside those above since they are not exhaustive
-                t.growthStage == DECAY;
-                t.age = std::round((w - 0.5) * 7.5);
-            }
-            trees.push_back(t);
         }
     }
 }
@@ -211,8 +209,6 @@ void EcoSim::absorption() {
             int x = floor(t.position[0]);
             int y = floor(t.position[1]);
             vegetationGrowth(t, x, y);
-            std::cout << "(" << x << ", " << y << ")" << std::endl;
-            std::cout << "GROWTH STAGE: " << t.growthStage << std::endl;
             new_biomass[x][y] += TreeMass[t.growthStage];
         }
     }

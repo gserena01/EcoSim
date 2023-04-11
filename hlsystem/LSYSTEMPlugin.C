@@ -754,7 +754,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			custom_node->moveToGoodPosition();
 		}
 
-		printf("\nWELCOME TO THE ECOSIM PLUGIN!\nPlease select a terrain image and four different tree growth geometry files");
+		printf("\nWELCOME TO THE ECOSIM PLUGIN!");
 		networkCreated = 1;
 	}
 
@@ -765,9 +765,8 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	int itr = YEARS(now);
 
 	// update eco simulation
-	EcoSim eco;
+	EcoSim eco = EcoSim();
 	eco.setTreesNoise();
-
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
 	}
@@ -778,14 +777,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string mature;
 	std::string decaying;
 	eco.getTreePositions(seeds, juveniles, mature, decaying);
-	printf(("\nSEEDS: "));
-	printf(seeds.c_str());
-	printf(("\nJUV: "));
-	printf(juveniles.c_str());
-	printf(("\nMATURE: "));
-	printf(mature.c_str());
-	printf(("\nDECAY: "));
-	printf(decaying.c_str());
 
 	// Update node parameters that changed during iteration:
 	OP_Node* seed_group_node;
