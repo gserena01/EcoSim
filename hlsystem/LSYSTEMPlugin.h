@@ -62,9 +62,9 @@ namespace HDK_Sample {
         // Example : To declare a function to fetch angle you need to do it this way 
         int YEARS(fpreal t) { return evalInt("years", 0, t); }
 
-        UT_String PLANT1(fpreal t) {
+        UT_String SEEDGEO(fpreal t) {
             UT_String str;
-            evalString(str, "plant1", 0, t);
+            evalString(str, "seedgeo", 0, t);
             return str;
         }
         UT_String TERRAIN(fpreal t) {

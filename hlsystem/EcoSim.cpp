@@ -63,24 +63,26 @@ void::EcoSim::setTreesNoise() {
     treeSet = true;
 
     for (int x = 0; x < TERRAIN_SIZE; x++) {
-        for (int y = 0; x < TERRAIN_SIZE; y++) {
+        for (int y = 0; y < TERRAIN_SIZE; y++) {
             float w = soilWater_values[x][y];
             Tree t;
             t.position = vec3(x, y, 0.0);
             t.id = treeID++;
             if (w > 0.7 && w < 1.3) {
-                t.growthStage == SEED;
-                t.age == std::round((w-0.5));
+                t.growthStage = SEED;
+                t.age = std::round((w-0.5));
+                trees.push_back(t);
             }
             else if (w >= 1.3 && w < 2.5) {
-                t.growthStage == JUVENILE;
+                t.growthStage = JUVENILE;
                 t.age = std::round((w - 1.3) * 2.91 + 2.0);
+                trees.push_back(t);
             }
             else if (w >= 2.5) {
-                t.growthStage == MATURE;
+                t.growthStage = MATURE;
                 t.age = std::round((w-0.5)*5.0);
+                trees.push_back(t);
             }
-            trees.push_back(t);
         }
     }
 }
