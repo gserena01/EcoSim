@@ -61,6 +61,8 @@ public:
     // MATURE = age >= 10
     const static int MATURE_MIN_AGE = 10;
 
+    constexpr const static float TreeMinAge[3] = { SEED_MIN_AGE, JUVENILE_MIN_AGE, MATURE_MIN_AGE };
+
     // TreeMass AKA Heights and biomass values
     constexpr const static float TreeMass[5] = { 0.1, 5.0, 10.0, 7.5, 0.0 };
 
@@ -79,6 +81,7 @@ public:
     // SETTERS
     void setTreesManual();
     void setTreesNoise();
+    void setTreesString(std::string inputPos, int type);
     void setVaporManual(float v);
     void setSoilWaterManual(float s);
 
@@ -140,4 +143,9 @@ private:
     // keeps track of the seeds from that new round
     // depletes into trees after growth stage (we don't want seeds to also grow this iteration)
     std::vector<Tree> seedlings;
+
+    // HELPERS
+    bool isNumber(char l);
+    void processRange(std::string startRange, std::string endRange, std::vector<int>& pos);
+    std::vector<int> processPosInput(std::string input);
 };

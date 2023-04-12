@@ -767,6 +767,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// update eco simulation
 	EcoSim eco = EcoSim();
 	eco.setTreesNoise();
+	//eco.setTreesString("1-10, 250-270, 700-800", eco.MATURE);
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
 	}

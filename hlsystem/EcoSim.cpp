@@ -62,15 +62,15 @@ void EcoSim::setTreesManual() {
 void::EcoSim::setTreesNoise() {
     treeSet = true;
 
-    for (int x = 0; x < TERRAIN_SIZE; x+=2) {
-        for (int y = 0; y < TERRAIN_SIZE; y+=2) {
+    for (int x = 0; x < TERRAIN_SIZE; x += 2) {
+        for (int y = 0; y < TERRAIN_SIZE; y += 2) {
             float w = soilWater_values[x][y];
             Tree t;
             t.position = vec3(x, y, 0.0);
             t.id = treeID++;
             if (w > 0.7 && w < 1.3) {
                 t.growthStage = SEED;
-                t.age = std::round((w-0.5));
+                t.age = std::round((w - 0.5));
                 trees.push_back(t);
             }
             else if (w >= 2.1 && w < 2.5) {
@@ -80,11 +80,31 @@ void::EcoSim::setTreesNoise() {
             }
             else if (w >= 2.5) {
                 t.growthStage = MATURE;
-                t.age = std::round((w-0.5)*5.0);
+                t.age = std::round((w - 0.5) * 5.0);
                 trees.push_back(t);
             }
         }
     }
+}
+
+void EcoSim::setTreesString(std::string input, int treeType) {
+    std::vector<int> pos = processPosInput(input);
+
+    treeSet = true;
+
+    int x;
+    int y;
+    for (int i : pos) {
+        x = i / TERRAIN_SIZE;
+        y = i - (TERRAIN_SIZE * x);
+        Tree t;
+        t.position = vec3(float(x), float(y), 0.0);
+        t.id = treeID++;
+        t.growthStage = treeType;
+        t.age = TreeMinAge[treeType];
+        trees.push_back(t);
+    }
+
 }
 
 
@@ -123,7 +143,7 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     // Updates the given strings with numbers of the new tree positions for display
     // Ex: tree at 0,0 = 0 ; tree at 31,31 = 1023
     // Output strings in the form "0 1 2 3"
-    // Returns vector of num of each tree age 
+    // Returns vector of num of each tree age
     // ie treenum[0] = 2 means there are 2 seed trees
 
     // empty the strings
@@ -142,22 +162,22 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     for (Tree& t : trees) {
         int pos = int(TERRAIN_SIZE * t.position[1] + t.position[0]);
         if (t.growthStage == SEED) {
-            numS+=1.0;
+            numS += 1.0;
             seed_pos.append(std::to_string(pos));
             seed_pos.push_back(' ');
         }
         else if (t.growthStage == JUVENILE) {
-            numJ+=1.0;
+            numJ += 1.0;
             juvenile_pos.append(std::to_string(pos));
             juvenile_pos.push_back(' ');
         }
         else if (t.growthStage == MATURE) {
-            numM+=1.0;
+            numM += 1.0;
             mature_pos.append(std::to_string(pos));
             mature_pos.push_back(' ');
         }
         else if (t.growthStage == DECAY) {
-            numD+=1.0;
+            numD += 1.0;
             decay_pos.append(std::to_string(pos));
             decay_pos.push_back(' ');
         }
@@ -327,6 +347,69 @@ void EcoSim::updateSeeds() {
         int y = floor(t.position[1]);
         biomass_values[x][y] += TreeMass[t.growthStage];
     }
+}
+
+
+//// RANDOM HELPER FUNCTIONS
+
+bool EcoSim::isNumber(char l) {
+    if (l == '0' ||
+        l == '1' ||
+        l == '2' ||
+        l == '3' ||
+        l == '4' ||
+        l == '5' ||
+        l == '6' ||
+        l == '7' ||
+        l == '8' ||
+        l == '9') {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void EcoSim::processRange(std::string startRange, std::string endRange, std::vector<int>& pos) {
+    for (int i = stoi(startRange); i <= stoi(endRange); ++i) {
+        pos.push_back(i);
+    }
+}
+
+
+std::vector<int> EcoSim::processPosInput(std::string input) {
+    input.push_back(' ');
+
+    std::vector<int> pos;
+    std::string curPos;
+    std::string startRange;
+    bool inRange = false;
+    for (int i = 0; i < input.size(); ++i) {
+        char l = input[i];
+        if (isNumber(l)) {
+            curPos.push_back(l);
+        }
+        else if (l == '-') {
+            startRange = curPos;
+            curPos = "";
+            inRange = true;
+        }
+        else {
+            if (curPos.size() != 0) {
+                if (!inRange) {
+                    pos.push_back(stoi(curPos));
+                    curPos = "";
+                }
+                else {
+                    processRange(startRange, curPos, pos);
+                    curPos = "";
+                    startRange = "";
+                    inRange = false;
+                }
+            }
+        }
+    }
+    return pos;
 }
 
 
