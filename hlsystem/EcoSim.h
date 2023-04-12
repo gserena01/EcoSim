@@ -27,7 +27,7 @@ public:
     const static int TERRAIN_HEIGHT = 4;
 
     // evaporation constance
-    constexpr const static float EVAP_CONSTANT = 1.5;
+    constexpr const static float EVAP_CONSTANT = .01;
 
     // water that a wet climate plant requires to grow
     // all wet climate trees requitrre half their mass in water
@@ -37,6 +37,8 @@ public:
     // transpiration coefficient
     // Paper cites 0.08 for Conifers and 0.16 for Deciduous
     constexpr static const float TRANSPIRATION = 0.16;
+
+    constexpr static const float MAX_SOIL_DIFFUSION = 2.5;
 
 
     ////// TREE STRUCT INFORMATION

@@ -29,7 +29,6 @@ void EcoSim::setSoilWaterManual(float s) {
 }
 
 void EcoSim::setTreesManual() {
-    // TODO: pull from existing starter trees on terrain
     // sets trees vector, biomass map, vegetationNeeds map
     treeSet = true;
 
@@ -62,15 +61,15 @@ void EcoSim::setTreesManual() {
 void::EcoSim::setTreesNoise() {
     treeSet = true;
 
-    for (int x = 0; x < TERRAIN_SIZE; x+=2) {
-        for (int y = 0; y < TERRAIN_SIZE; y+=2) {
+    for (int x = 0; x < TERRAIN_SIZE; x += 2) {
+        for (int y = 0; y < TERRAIN_SIZE; y += 2) {
             float w = soilWater_values[x][y];
             Tree t;
             t.position = vec3(x, y, 0.0);
             t.id = treeID++;
             if (w > 0.7 && w < 1.3) {
                 t.growthStage = SEED;
-                t.age = std::round((w-0.5));
+                t.age = std::round((w - 0.5));
                 trees.push_back(t);
             }
             else if (w >= 2.1 && w < 2.5) {
@@ -80,7 +79,7 @@ void::EcoSim::setTreesNoise() {
             }
             else if (w >= 2.5) {
                 t.growthStage = MATURE;
-                t.age = std::round((w-0.5)*5.0);
+                t.age = std::round((w - 0.5) * 5.0);
                 trees.push_back(t);
             }
         }
@@ -123,7 +122,7 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     // Updates the given strings with numbers of the new tree positions for display
     // Ex: tree at 0,0 = 0 ; tree at 31,31 = 1023
     // Output strings in the form "0 1 2 3"
-    // Returns vector of num of each tree age 
+    // Returns vector of num of each tree age
     // ie treenum[0] = 2 means there are 2 seed trees
 
     // empty the strings
@@ -142,22 +141,22 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     for (Tree& t : trees) {
         int pos = int(TERRAIN_SIZE * t.position[1] + t.position[0]);
         if (t.growthStage == SEED) {
-            numS+=1.0;
+            numS += 1.0;
             seed_pos.append(std::to_string(pos));
             seed_pos.push_back(' ');
         }
         else if (t.growthStage == JUVENILE) {
-            numJ+=1.0;
+            numJ += 1.0;
             juvenile_pos.append(std::to_string(pos));
             juvenile_pos.push_back(' ');
         }
         else if (t.growthStage == MATURE) {
-            numM+=1.0;
+            numM += 1.0;
             mature_pos.append(std::to_string(pos));
             mature_pos.push_back(' ');
         }
         else if (t.growthStage == DECAY) {
-            numD+=1.0;
+            numD += 1.0;
             decay_pos.append(std::to_string(pos));
             decay_pos.push_back(' ');
         }
@@ -193,8 +192,9 @@ void EcoSim::soilWaterDiffusion() {
     // Updates soilWater_values map based on precipitation
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
         for (int y = 0; y < TERRAIN_SIZE; ++y) {
-            float updatedSoil = soilWater_values[x][y] + precipitation_values[x][y] - vegetationNeeds_values[x][y] - EVAP_CONSTANT;
-            soilWater_values[x][y] = max(updatedSoil, 0.f);
+            float updatedSoil = (EVAP_CONSTANT * soilWater_values[x][y]) + precipitation_values[x][y] - vegetationNeeds_values[x][y];
+            updatedSoil = max(updatedSoil, 0.f);
+            soilWater_values[x][y] = min(updatedSoil, MAX_SOIL_DIFFUSION);
         }
     }
 }
