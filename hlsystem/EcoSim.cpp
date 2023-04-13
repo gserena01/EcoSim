@@ -29,8 +29,8 @@ void EcoSim::setSoilWaterManual(float s) {
 }
 
 void EcoSim::setTreesManual() {
-    // TODO: pull from existing starter trees on terrain
     // sets trees vector, biomass map, vegetationNeeds map
+    // sets manually created trees for testing 
     treeSet = true;
 
     Tree tr;
@@ -60,6 +60,9 @@ void EcoSim::setTreesManual() {
 }
 
 void::EcoSim::setTreesNoise() {
+    // sets trees vector, biomass map, vegetationNeeds map
+    // sets based on soil water noise function 
+
     treeSet = true;
 
     for (int x = 0; x < TERRAIN_SIZE; x += 2) {
@@ -85,9 +88,21 @@ void::EcoSim::setTreesNoise() {
             }
         }
     }
+
+    // update biomass values
+    for (Tree& t : trees) {
+        int x = floor(t.position[0]);
+        int y = floor(t.position[1]);
+        biomass_values[x][y] += TreeMass[t.growthStage];
+    }
+    // set vegetationNeeds
+    absorptionReqs();
 }
 
 void EcoSim::setTreesString(std::string input, int treeType) {
+    // sets trees vector, biomass map, vegetationNeeds map
+    // sets based on input string 
+
     std::vector<int> pos = processPosInput(input);
 
     treeSet = true;
@@ -104,6 +119,15 @@ void EcoSim::setTreesString(std::string input, int treeType) {
         t.age = TreeMinAge[treeType];
         trees.push_back(t);
     }
+
+    // update biomass values
+    for (Tree& t : trees) {
+        int x = floor(t.position[0]);
+        int y = floor(t.position[1]);
+        biomass_values[x][y] += TreeMass[t.growthStage];
+    }
+    // set vegetationNeeds
+    absorptionReqs();
 
 }
 

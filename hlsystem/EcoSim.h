@@ -26,8 +26,8 @@ public:
     const static int TERRAIN_SIZE = 32;
     const static int TERRAIN_HEIGHT = 4;
 
-    // evaporation constance
-    constexpr const static float EVAP_CONSTANT = 1.5;
+    // evaporation constant
+    float EVAP_CONSTANT = 1.5;
 
     // water that a wet climate plant requires to grow
     // all wet climate trees requitrre half their mass in water
