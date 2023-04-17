@@ -30,7 +30,7 @@ void EcoSim::setSoilWaterManual(float s) {
 
 void EcoSim::setTreesManual() {
     // sets trees vector, biomass map, vegetationNeeds map
-    // sets manually created trees for testing 
+    // sets manually created trees for testing
     treeSet = true;
 
     Tree tr;
@@ -61,7 +61,7 @@ void EcoSim::setTreesManual() {
 
 void::EcoSim::setTreesNoise() {
     // sets trees vector, biomass map, vegetationNeeds map
-    // sets based on soil water noise function 
+    // sets based on soil water noise function
 
     treeSet = true;
 
@@ -101,7 +101,7 @@ void::EcoSim::setTreesNoise() {
 
 void EcoSim::setTreesString(std::string input, int treeType) {
     // sets trees vector, biomass map, vegetationNeeds map
-    // sets based on input string 
+    // sets based on input string
 
     std::vector<int> pos = processPosInput(input);
 
@@ -214,6 +214,55 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     treenum.push_back(numD);
 
     return treenum;
+}
+
+std::vector<float> EcoSim::getCloudPositions(std::string& small_pos, std::string& med_pos, std::string& big_pos) {
+    // Updates the given strings with numbers of the cloud positions for display
+    // Ex: cloud at 0,0 = 0 ; cloud at 31,31 = 1023
+    // Output strings in the form "0 1 2 3"
+    // Returns vector of num of each cloud size
+    // ie clous_num[0] = 2 means there are 2 small clouds
+
+    // empty the strings
+    small_pos = "";
+    med_pos = "";
+    big_pos = "";
+
+    // counters
+    float numS = 0;
+    float numM = 0;
+    float numB = 0;
+
+    // populate position strings
+    for (int x = 0; x < TERRAIN_SIZE; ++x) {
+        for (int y = 0; y < TERRAIN_SIZE; ++y) {
+            int pos = int(TERRAIN_SIZE * y + x);
+            if (precipitation_values[x][y] >= small_cloud &&
+                precipitation_values[x][y] < med_cloud) {
+                numS += 1.0;
+                small_pos.append(std::to_string(pos));
+                small_pos.push_back(' ');
+            }
+            else if (precipitation_values[x][y] >= med_cloud &&
+                precipitation_values[x][y] < big_cloud) {
+                numM += 1.0;
+                med_pos.append(std::to_string(pos));
+                med_pos.push_back(' ');
+            }
+            else if (precipitation_values[x][y] >= big_cloud) {
+                numB += 1.0;
+                big_pos.append(std::to_string(pos));
+                big_pos.push_back(' ');
+            }
+        }
+    }
+
+    std::vector<float> cloud_num;
+    cloud_num.push_back(numS);
+    cloud_num.push_back(numM);
+    cloud_num.push_back(numB);
+
+    return cloud_num;
 }
 
 //// CLIMATIC PROCESSES

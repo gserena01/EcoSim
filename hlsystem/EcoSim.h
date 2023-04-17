@@ -27,7 +27,7 @@ public:
     const static int TERRAIN_HEIGHT = 4;
 
     // evaporation constant
-    float EVAP_CONSTANT = 1.5;
+    float EVAP_CONSTANT = 3.0;
 
     // water that a wet climate plant requires to grow
     // all wet climate trees requitrre half their mass in water
@@ -76,6 +76,8 @@ public:
     std::vector<float> getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
         std::string& mature_pos, std::string& decay_pos);
 
+    std::vector<float> getCloudPositions(std::string& small_pos, std::string& med_pos, std::string& big_pos);
+
     std::vector<Tree> trees;
 
     // SETTERS
@@ -121,6 +123,11 @@ private:
 
     // Must be set to TRUE for cycle to run
     bool treeSet = false;
+
+    // Cloud size thesholds
+    constexpr static const float small_cloud = 1.0;
+    constexpr static const float med_cloud = 4.0;
+    constexpr static const float big_cloud = 10.0;
 
     ///// WATER CYCLE MAP VALUES
 
