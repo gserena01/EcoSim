@@ -10,7 +10,6 @@ struct Tree {
     vec3 position;
     int age;
     int growthStage;
-    // int preferredClimate;  TODO: Subtask 6.3
     int id;
 };
 
@@ -27,7 +26,7 @@ public:
     const static int TERRAIN_HEIGHT = 4;
 
     // evaporation constant
-    float EVAP_CONSTANT = 3.0;
+    float EVAP_CONSTANT = 1.5;
 
     // water that a wet climate plant requires to grow
     // all wet climate trees requitrre half their mass in water
@@ -73,19 +72,22 @@ public:
 
     void cycle();
 
+    // Outputs strings of tree positions by age within 1024 grid
     std::vector<float> getTreePositions(std::string& seed_pos, std::string& juvenile_pos,
         std::string& mature_pos, std::string& decay_pos);
-
+    
+    // Outputs strings of cloud positions by size within 1024 grid
     std::vector<float> getCloudPositions(std::string& small_pos, std::string& med_pos, std::string& big_pos);
 
     std::vector<Tree> trees;
 
     // SETTERS
-    void setTreesManual();
     void setTreesNoise();
     void setTreesString(std::string inputPos, int type);
-    void setVaporManual(float v);
-    void setSoilWaterManual(float s);
+    void setTreesManual(); // used for testing
+    // vapor and soil are automatically set with noise in the constructor, but they can be overwritten uniformly 
+    void setVaporManual(float v); // used for testing
+    void setSoilWaterManual(float s); // used for testing
 
     // PRINTERS (for testing)
     void printVapor();
@@ -117,6 +119,8 @@ protected:
     void spawnSeed(vec3 parentPos);
     // Pops seedlings into trees vector
     void updateSeeds();
+    // At any given time, can be called to sum up current biomass 
+    void update_biomass();
 
 
 private:
@@ -124,7 +128,7 @@ private:
     // Must be set to TRUE for cycle to run
     bool treeSet = false;
 
-    // Cloud size thesholds
+    // Cloud size thresholds
     constexpr static const float small_cloud = 1.0;
     constexpr static const float med_cloud = 4.0;
     constexpr static const float big_cloud = 10.0;
