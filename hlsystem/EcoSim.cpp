@@ -29,8 +29,8 @@ void EcoSim::setSoilWaterManual(float s) {
 }
 
 void EcoSim::setTreesManual() {
-    // TODO: pull from existing starter trees on terrain
     // sets trees vector, biomass map, vegetationNeeds map
+    // sets manually created trees for testing
     treeSet = true;
 
     Tree tr;
@@ -50,47 +50,80 @@ void EcoSim::setTreesManual() {
     trees.push_back(tr1);
 
     // update biomass values
-    for (Tree& t : trees) {
-        int x = floor(t.position[0]);
-        int y = floor(t.position[1]);
-        biomass_values[x][y] += TreeMass[t.growthStage];
-    }
+    update_biomass();
     // set vegetationNeeds
     absorptionReqs();
 }
 
 void::EcoSim::setTreesNoise() {
+    // sets trees vector, biomass map, vegetationNeeds map
+    // sets based on soil water noise function
+
     treeSet = true;
 
-    for (int x = 0; x < TERRAIN_SIZE; x++) {
-        for (int y = 0; y < TERRAIN_SIZE; y++) {
+    for (int x = 0; x < TERRAIN_SIZE; x += 2) {
+        for (int y = 0; y < TERRAIN_SIZE; y += 2) {
             float w = soilWater_values[x][y];
             Tree t;
             t.position = vec3(x, y, 0.0);
             t.id = treeID++;
             if (w > 0.7 && w < 1.3) {
                 t.growthStage = SEED;
-                t.age = std::round((w-0.5));
+                t.age = std::round((w - 0.5));
                 trees.push_back(t);
             }
-            else if (w >= 1.3 && w < 2.5) {
+            else if (w >= 2.1 && w < 2.5) {
                 t.growthStage = JUVENILE;
-                t.age = std::round((w - 1.3) * 2.91 + 2.0);
+                t.age = std::round((w - 2.1) * 17.5 + 2.0);
                 trees.push_back(t);
             }
             else if (w >= 2.5) {
                 t.growthStage = MATURE;
-                t.age = std::round((w-0.5)*5.0);
+                t.age = std::round((w - 0.5) * 5.0);
                 trees.push_back(t);
             }
         }
     }
+
+    // update biomass values
+    update_biomass();
+    // set vegetationNeeds
+    absorptionReqs();
+}
+
+void EcoSim::setTreesString(std::string input, int treeType) {
+    // sets trees vector, biomass map, vegetationNeeds map
+    // sets based on input string
+
+    // converts the input string into a vector of ints
+    std::vector<int> pos = processPosInput(input);
+
+    treeSet = true;
+
+    int x;
+    int y;
+    for (int i : pos) {
+        // convert grid int into x, y indices
+        x = i / TERRAIN_SIZE;
+        y = i - (TERRAIN_SIZE * x);
+        Tree t;
+        t.position = vec3(float(x), float(y), 0.0);
+        t.id = treeID++;
+        t.growthStage = treeType;
+        t.age = TreeMinAge[treeType];
+        trees.push_back(t);
+    }
+
+    // update biomass values
+    update_biomass();
+    // set vegetationNeeds
+    absorptionReqs();
+
 }
 
 
 void EcoSim::cycle()
 {
-
     // check if initial values are set
     if (!treeSet) {
         std::cout << "ERROR: starting TREES not set" << std::endl;
@@ -106,13 +139,13 @@ void EcoSim::cycle()
     // turn SOIL WATER into VEGETATION
     absorption();
 
-    // add seedlings to Trees and Biomass
+    // add seeds to Trees and Biomass
     updateSeeds();
 
     // update the water needs of VEGETATION
     absorptionReqs();
 
-    // turn VEGETATION into EVAPORATION
+    // turn VEGETATION into VAPOR
     evaporation();
 
 }
@@ -123,7 +156,7 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     // Updates the given strings with numbers of the new tree positions for display
     // Ex: tree at 0,0 = 0 ; tree at 31,31 = 1023
     // Output strings in the form "0 1 2 3"
-    // Returns vector of num of each tree age 
+    // Returns vector of num of each tree age
     // ie treenum[0] = 2 means there are 2 seed trees
 
     // empty the strings
@@ -142,22 +175,22 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     for (Tree& t : trees) {
         int pos = int(TERRAIN_SIZE * t.position[1] + t.position[0]);
         if (t.growthStage == SEED) {
-            numS+=1.0;
+            numS += 1.0;
             seed_pos.append(std::to_string(pos));
             seed_pos.push_back(' ');
         }
         else if (t.growthStage == JUVENILE) {
-            numJ+=1.0;
+            numJ += 1.0;
             juvenile_pos.append(std::to_string(pos));
             juvenile_pos.push_back(' ');
         }
         else if (t.growthStage == MATURE) {
-            numM+=1.0;
+            numM += 1.0;
             mature_pos.append(std::to_string(pos));
             mature_pos.push_back(' ');
         }
         else if (t.growthStage == DECAY) {
-            numD+=1.0;
+            numD += 1.0;
             decay_pos.append(std::to_string(pos));
             decay_pos.push_back(' ');
         }
@@ -171,6 +204,56 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
 
     return treenum;
 }
+
+std::vector<float> EcoSim::getCloudPositions(std::string& small_pos, std::string& med_pos, std::string& big_pos) {
+    // Updates the given strings with numbers of the cloud positions for display
+    // Ex: cloud at 0,0 = 0 ; cloud at 31,31 = 1023
+    // Output strings in the form "0 1 2 3"
+    // Returns vector of num of each cloud size
+    // ie clous_num[0] = 2 means there are 2 small clouds
+
+    // empty the strings
+    small_pos = "";
+    med_pos = "";
+    big_pos = "";
+
+    // counters
+    float numS = 0;
+    float numM = 0;
+    float numB = 0;
+
+    // populate position strings
+    for (int x = 0; x < TERRAIN_SIZE; ++x) {
+        for (int y = 0; y < TERRAIN_SIZE; ++y) {
+            int pos = int(TERRAIN_SIZE * y + x);
+            if (precipitation_values[x][y] >= small_cloud &&
+                precipitation_values[x][y] < med_cloud) {
+                numS += 1.0;
+                small_pos.append(std::to_string(pos));
+                small_pos.push_back(' ');
+            }
+            else if (precipitation_values[x][y] >= med_cloud &&
+                precipitation_values[x][y] < big_cloud) {
+                numM += 1.0;
+                med_pos.append(std::to_string(pos));
+                med_pos.push_back(' ');
+            }
+            else if (precipitation_values[x][y] >= big_cloud) {
+                numB += 1.0;
+                big_pos.append(std::to_string(pos));
+                big_pos.push_back(' ');
+            }
+        }
+    }
+
+    std::vector<float> cloud_num;
+    cloud_num.push_back(numS);
+    cloud_num.push_back(numM);
+    cloud_num.push_back(numB);
+
+    return cloud_num;
+}
+
 
 //// CLIMATIC PROCESSES
 
@@ -200,8 +283,8 @@ void EcoSim::soilWaterDiffusion() {
 }
 
 void EcoSim::absorption() {
-
-    // updates all vegetation based on soil water
+    // Updates all vegetation based on soil water
+    
     float new_biomass[TERRAIN_SIZE][TERRAIN_SIZE] = { {0.0} };
 
     for (Tree& t : trees) {
@@ -213,7 +296,7 @@ void EcoSim::absorption() {
         }
     }
 
-    // update biomass values
+    // update biomass values with new biomass 
     for (int x = 0; x < TERRAIN_SIZE; ++x) {
         for (int y = 0; y < TERRAIN_SIZE; ++y) {
             biomass_values[x][y] = new_biomass[x][y];
@@ -246,7 +329,6 @@ void EcoSim::evaporation() {
         for (int y = 0; y < TERRAIN_SIZE; ++y) {
             for (int z = 0; z < TERRAIN_SIZE; ++z) {
                 vapor_values[x][y][z] = TRANSPIRATION * (1.0 / (z + 1.0)) * biomass_values[x][y];
-                // TODO: apply noise (Gaussian), Subtask 6.1
             }
         }
     }
@@ -267,7 +349,6 @@ void EcoSim::vegetationGrowth(Tree& t, int x, int y) {
         if (t.growthStage != MATURE) {
             // SEED, JUVENILE, and DECAYing trees die
             t.growthStage = DEAD;
-            //std::cout << "TREE DIED! ID: " << t.id << std::endl;
         }
         else {
             t.growthStage = DECAY;
@@ -296,6 +377,9 @@ void EcoSim::increaseGrowthStage(Tree& t) {
 }
 
 void EcoSim::spawnSeed(vec3 parentPos) {
+    // Spawns a seeds within a random spot along the radius of the parent tree
+    // Called if mature tree has enough water to grow
+
     Tree babyTree;
     babyTree.age = 0;
     babyTree.growthStage = SEED;
@@ -304,7 +388,6 @@ void EcoSim::spawnSeed(vec3 parentPos) {
     float deltaX = cos(babyTree.id * theta) * seedR;
     float deltaY = sin(babyTree.id * theta) * seedR;
 
-    // TODO: z value needs to be from height field Subtask 4.3
     babyTree.position = vec3(deltaX + parentPos[0], deltaY + parentPos[1], parentPos[2]);
 
     if ((babyTree.position[0] < 0 || babyTree.position[0] > TERRAIN_SIZE)
@@ -318,6 +401,9 @@ void EcoSim::spawnSeed(vec3 parentPos) {
 }
 
 void EcoSim::updateSeeds() {
+    // Removes seeds from seedlings vectors and puts in trees vector
+    // Updates biomass 
+
     while (seedlings.size() > 0) {
         Tree& t = seedlings.back();
         seedlings.pop_back();
@@ -327,6 +413,87 @@ void EcoSim::updateSeeds() {
         int y = floor(t.position[1]);
         biomass_values[x][y] += TreeMass[t.growthStage];
     }
+}
+
+void EcoSim::update_biomass() {
+    // Update biomass values for all trees at any given time 
+    for (Tree& t : trees) {
+        int x = floor(t.position[0]);
+        int y = floor(t.position[1]);
+        biomass_values[x][y] += TreeMass[t.growthStage];
+    }
+}
+
+
+
+//// RANDOM HELPER FUNCTIONS
+
+bool EcoSim::isNumber(char l) {
+    // Returns true is input char represents a number 0-9
+    if (l == '0' ||
+        l == '1' ||
+        l == '2' ||
+        l == '3' ||
+        l == '4' ||
+        l == '5' ||
+        l == '6' ||
+        l == '7' ||
+        l == '8' ||
+        l == '9') {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void EcoSim::processRange(std::string startRange, std::string endRange, std::vector<int>& pos) {
+    // Helper function for process input 
+    // pushed back all the numbers given start and end range 
+    for (int i = stoi(startRange); i <= stoi(endRange); ++i) {
+        pos.push_back(i);
+    }
+}
+
+
+std::vector<int> EcoSim::processPosInput(std::string input) {
+    // converts the input string into a vector of ints
+    // ie "1 2 3" into {1, 2, 3}
+    // also handles weird spacing and ranges
+    // ie "   1 , 2, 4-6  " into {1, 2, 4, 5, 6}
+
+    input.push_back(' ');
+
+    std::vector<int> pos;
+    std::string curPos;
+    std::string startRange;
+    bool inRange = false;
+    for (int i = 0; i < input.size(); ++i) {
+        char l = input[i];
+        if (isNumber(l)) {
+            curPos.push_back(l);
+        }
+        else if (l == '-') {
+            startRange = curPos;
+            curPos = "";
+            inRange = true;
+        }
+        else {
+            if (curPos.size() != 0) {
+                if (!inRange) {
+                    pos.push_back(stoi(curPos));
+                    curPos = "";
+                }
+                else {
+                    processRange(startRange, curPos, pos);
+                    curPos = "";
+                    startRange = "";
+                    inRange = false;
+                }
+            }
+        }
+    }
+    return pos;
 }
 
 

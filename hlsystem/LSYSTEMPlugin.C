@@ -54,6 +54,7 @@ static PRM_Name matureName("maturePlacement", "Mature Tree Placement");
 static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 
 static PRM_Name		iterationName("years", "Years");
+static PRM_Name		evaporationName("evap", "Evaporation Constant");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +67,9 @@ static PRM_Name		iterationName("years", "Years");
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
 								PRM_RANGE_UI, 30);
+static PRM_Default evaporationDefault(1.5);
+static PRM_Range evaporationRange(PRM_RANGE_UI, 0.0,
+								  PRM_RANGE_UI, 3.0);
 static PRM_Default terrainDefault(0, "$HIP/Assets/noise_texture.jpg");
 static PRM_Default seedgeoDefault(0, "$HIP/Assets/seed.obj");
 static PRM_Default juvenilegeoDefault(0, "$HIP/Assets/juvenile_tree.obj");
@@ -91,6 +95,7 @@ SOP_Lsystem::myTemplateList[] = {
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &decayinggeoName, &decayinggeoDefault, 0),
 
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
+	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &evaporationName, &evaporationDefault, 0, &evaporationRange),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &seedName, &seedDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &juvenileName, &juvenileDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &matureName, &matureDefault, 0),
@@ -843,10 +848,13 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string seedgeoFile = SEEDGEO(now).toStdString();
 
 	int itr = YEARS(now);
+	float evap_const = EVAP(now);
 
 	// update eco simulation
 	EcoSim eco = EcoSim();
+	eco.EVAP_CONSTANT = evap_const;
 	eco.setTreesNoise();
+	//eco.setTreesString("1-10, 250-270, 700-800", eco.MATURE);
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
 	}
