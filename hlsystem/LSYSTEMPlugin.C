@@ -182,21 +182,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		OP_Node* seed_scatter_node;
 		OP_Node* seed_file_node;
 		OP_Node* seed_pack_node;
+		OP_Node* seed_material_node;
 		OP_Node* seed_copy_to_points_node;
 		OP_Node* juvenile_group_node;
 		OP_Node* juvenile_scatter_node;
 		OP_Node* juvenile_file_node;
 		OP_Node* juvenile_pack_node;
+		OP_Node* juvenile_material_node;
 		OP_Node* juvenile_copy_to_points_node;
 		OP_Node* mature_group_node;
 		OP_Node* mature_scatter_node;
 		OP_Node* mature_file_node;
 		OP_Node* mature_pack_node;
+		OP_Node* mature_material_node;
 		OP_Node* mature_copy_to_points_node;
 		OP_Node* decaying_group_node;
 		OP_Node* decaying_scatter_node;
 		OP_Node* decaying_file_node;
 		OP_Node* decaying_pack_node;
+		OP_Node* decaying_material_node;
 		OP_Node* decaying_copy_to_points_node;
 		OP_Node* color_node;
 		OP_Node* merge_node;
@@ -375,6 +379,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		seed_pack_node->moveToGoodPosition();
 
+		// Material Node
+		// create node
+		seed_material_node = parent->createNode("material", "seedmaterial");
+		if (!seed_material_node)
+			return error();
+		// run creation script
+		if (!seed_material_node->runCreateScript())
+			return error();
+		// set parameters
+		seed_material_node->setString(UT_String("/mat/seed_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (seed_pack_node)
+		{
+			seed_material_node->setInput(0, seed_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		seed_material_node->moveToGoodPosition();
+
 		// Copy to Points Node
 		// create node
 		seed_copy_to_points_node = parent->createNode("copytopoints", "seedcopytopoints");
@@ -384,9 +407,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!seed_copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		if (seed_pack_node)
+		if (seed_material_node)
 		{
-			seed_copy_to_points_node->setInput(0, seed_pack_node);       // set first input to /obj/null1
+			seed_copy_to_points_node->setInput(0, seed_material_node);       // set first input to /obj/null1
 		}
 		if (seed_scatter_node) {
 			seed_copy_to_points_node->setInput(1, seed_scatter_node);
@@ -474,6 +497,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		juvenile_pack_node->moveToGoodPosition();
 
+		// Material Node
+		// create node
+		juvenile_material_node = parent->createNode("material", "juvenilematerial");
+		if (!juvenile_material_node)
+			return error();
+		// run creation script
+		if (!juvenile_material_node->runCreateScript())
+			return error();
+		// set parameters
+		juvenile_material_node->setString(UT_String("/mat/juvenile_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (juvenile_pack_node)
+		{
+			juvenile_material_node->setInput(0, juvenile_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		juvenile_material_node->moveToGoodPosition();
+
 		// Copy to Points Node
 		// create node
 		juvenile_copy_to_points_node = parent->createNode("copytopoints", "juvenilecopytopoints");
@@ -483,9 +525,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!juvenile_copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		if (juvenile_pack_node)
+		if (juvenile_material_node)
 		{
-			juvenile_copy_to_points_node->setInput(0, juvenile_pack_node);       // set first input to /obj/null1
+			juvenile_copy_to_points_node->setInput(0, juvenile_material_node);       // set first input to /obj/null1
 		}
 		if (juvenile_scatter_node) {
 			juvenile_copy_to_points_node->setInput(1, juvenile_scatter_node);
@@ -573,6 +615,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		mature_pack_node->moveToGoodPosition();
 
+		// Material Node
+		// create node
+		mature_material_node = parent->createNode("material", "maturematerial");
+		if (!mature_material_node)
+			return error();
+		// run creation script
+		if (!mature_material_node->runCreateScript())
+			return error();
+		// set parameters
+		mature_material_node->setString(UT_String("/mat/mature_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (mature_pack_node)
+		{
+			mature_material_node->setInput(0, mature_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		mature_material_node->moveToGoodPosition();
+
 		// Copy to Points Node
 		// create node
 		mature_copy_to_points_node = parent->createNode("copytopoints", "maturecopytopoints");
@@ -582,9 +643,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!mature_copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		if (mature_pack_node)
+		if (mature_material_node)
 		{
-			mature_copy_to_points_node->setInput(0, mature_pack_node);       // set first input to /obj/null1
+			mature_copy_to_points_node->setInput(0, mature_material_node);       // set first input to /obj/null1
 		}
 		if (mature_scatter_node) {
 			mature_copy_to_points_node->setInput(1, mature_scatter_node);
@@ -672,6 +733,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		// inputs
 		decaying_pack_node->moveToGoodPosition();
 
+		// Material Node
+		// create node
+		decaying_material_node = parent->createNode("material", "decayingmaterial");
+		if (!decaying_material_node)
+			return error();
+		// run creation script
+		if (!decaying_material_node->runCreateScript())
+			return error();
+		// set parameters
+		decaying_material_node->setString(UT_String("/mat/decaying_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (decaying_pack_node)
+		{
+			decaying_material_node->setInput(0, decaying_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		decaying_material_node->moveToGoodPosition();
+
 		// Copy to Points Node
 		// create node
 		decaying_copy_to_points_node = parent->createNode("copytopoints", "decayingcopytopoints");
@@ -681,9 +761,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		if (!decaying_copy_to_points_node->runCreateScript())
 			return error();
 		// connect the node
-		if (decaying_pack_node)
+		if (decaying_material_node)
 		{
-			decaying_copy_to_points_node->setInput(0, decaying_pack_node);       // set first input to /obj/null1
+			decaying_copy_to_points_node->setInput(0, decaying_material_node);       // set first input to /obj/null1
 		}
 		if (decaying_scatter_node) {
 			decaying_copy_to_points_node->setInput(1, decaying_scatter_node);
