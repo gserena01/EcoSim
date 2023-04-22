@@ -248,6 +248,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		OP_Node* color_node;
 		OP_Node* merge_node;
 		OP_Node* custom_node;
+		OP_Node* export_node;
 
 		// create node
 		heightfield_file_node = parent->createNode("heightfield_file", "heightfield_file1");
@@ -1242,6 +1243,25 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 			custom_node->pickRequest(true);
 			custom_node->moveToGoodPosition();
 		}
+
+		// The File Export Node
+		// create node
+		export_node = parent->createNode("file", "export");
+		if (!export_node)
+			return error();
+		// run creation script
+		if (!export_node->runCreateScript())
+			return error();
+		// set parameters
+		export_node->setString(UT_String("$HIP/Exported_Geometry.obj"), CH_STRING_LITERAL, "file", 0, t);
+		export_node->setInt("filemode", 0, t, 2);
+		// connect the node
+		if (custom_node) {
+			export_node->setInput(0, custom_node);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		export_node->moveToGoodPosition();
 
 		printf("\nWELCOME TO THE ECOSIM PLUGIN!");
 		networkCreated = 1;
