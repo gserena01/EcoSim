@@ -48,6 +48,10 @@ static PRM_Name	juvenilegeoName("juvenilegeo", "Juvenile Geometry");
 static PRM_Name	maturegeoName("maturegeo", "Mature Geometry");
 static PRM_Name	decayinggeoName("decayinggeo", "Decaying Geometry");
 
+static PRM_Name	smallcloudgeoName("smallcloudgeo", "Small Cloud Geometry");
+static PRM_Name	medcloudgeoName("medcloudgeo", "Medium Cloud Geometry");
+static PRM_Name	bigcloudgeoName("bigcloudgeo", "Big Cloud Geometry");
+
 static PRM_Name seedName("seedPlacement", "Seed Placement");
 static PRM_Name juvenileName("juvenilePlacement", "Juvenile Tree Placement");
 static PRM_Name matureName("maturePlacement", "Mature Tree Placement");
@@ -55,7 +59,6 @@ static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 
 static PRM_Name		iterationName("years", "Years");
 static PRM_Name		evaporationName("evap", "Evaporation Constant");
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				     ^^^^^^^^    ^^^^^^^^^^^^^^^
@@ -75,11 +78,13 @@ static PRM_Default seedgeoDefault(0, "$HIP/Assets/seed.obj");
 static PRM_Default juvenilegeoDefault(0, "$HIP/Assets/juvenile_tree.obj");
 static PRM_Default maturegeoDefault(0, "$HIP/Assets/mature_tree.obj");
 static PRM_Default decayinggeoDefault(0, "$HIP/Assets/decaying_tree.obj");
+static PRM_Default smallcloudgeoDefault(0, "$HIP/Assets/small_cloud.obj");
+static PRM_Default medcloudgeoDefault(0, "$HIP/Assets/med_cloud.obj");
+static PRM_Default bigcloudgeoDefault(0, "$HIP/Assets/big_cloud.obj");
 static PRM_Default seedDefault(0, "");
 static PRM_Default juvenileDefault(0, "");
 static PRM_Default matureDefault(0, "");
 static PRM_Default decayingDefault(0, "");
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -93,6 +98,10 @@ SOP_Lsystem::myTemplateList[] = {
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &juvenilegeoName, &juvenilegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &maturegeoName, &maturegeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &decayinggeoName, &decayinggeoDefault, 0),
+
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &smallcloudgeoName, &smallcloudgeoDefault, 0),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &medcloudgeoName, &medcloudgeoDefault, 0),
+	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &bigcloudgeoName, &bigcloudgeoDefault, 0),
 
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &evaporationName, &evaporationDefault, 0, &evaporationRange),
@@ -183,30 +192,59 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		OP_Node* heightfield_noise_node;
 		OP_Node* switch_node;
 		OP_Node* convert_heightfield_node;
+
 		OP_Node* seed_group_node;
 		OP_Node* seed_scatter_node;
 		OP_Node* seed_file_node;
 		OP_Node* seed_pack_node;
 		OP_Node* seed_material_node;
 		OP_Node* seed_copy_to_points_node;
+
 		OP_Node* juvenile_group_node;
 		OP_Node* juvenile_scatter_node;
 		OP_Node* juvenile_file_node;
 		OP_Node* juvenile_pack_node;
 		OP_Node* juvenile_material_node;
 		OP_Node* juvenile_copy_to_points_node;
+
 		OP_Node* mature_group_node;
 		OP_Node* mature_scatter_node;
 		OP_Node* mature_file_node;
 		OP_Node* mature_pack_node;
 		OP_Node* mature_material_node;
 		OP_Node* mature_copy_to_points_node;
+
 		OP_Node* decaying_group_node;
 		OP_Node* decaying_scatter_node;
 		OP_Node* decaying_file_node;
 		OP_Node* decaying_pack_node;
 		OP_Node* decaying_material_node;
 		OP_Node* decaying_copy_to_points_node;
+
+		OP_Node* small_cloud_file_node;
+		OP_Node* small_cloud_pack_node;
+		OP_Node* small_cloud_material_node;
+		OP_Node* small_cloud_group_node;
+		OP_Node* small_cloud_scatter_node;
+		OP_Node* small_cloud_copy_to_points_node;
+		OP_Node* small_cloud_transform_node;
+
+		OP_Node* med_cloud_file_node;
+		OP_Node* med_cloud_pack_node;
+		OP_Node* med_cloud_material_node;
+		OP_Node* med_cloud_group_node;
+		OP_Node* med_cloud_scatter_node;
+		OP_Node* med_cloud_copy_to_points_node;
+		OP_Node* med_cloud_transform_node;
+
+		OP_Node* big_cloud_file_node;
+		OP_Node* big_cloud_pack_node;
+		OP_Node* big_cloud_material_node;
+		OP_Node* big_cloud_group_node;
+		OP_Node* big_cloud_scatter_node;
+		OP_Node* big_cloud_copy_to_points_node;
+		OP_Node* big_cloud_transform_node;
+
 		OP_Node* color_node;
 		OP_Node* merge_node;
 		OP_Node* custom_node;
@@ -801,6 +839,363 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		}
 		color_node->moveToGoodPosition();
 
+		// Small Cloud Primitive 
+		// File Node
+		// create node
+		small_cloud_file_node = parent->createNode("file", "smallcloudfile");
+		if (!small_cloud_file_node)
+			return error();
+		// run creation script
+		if (!small_cloud_file_node->runCreateScript())
+			return error();
+		// set parameters
+		small_cloud_file_node->setString(UT_String("`chs(\"../CusEcoSim1/smallcloudgeo\")`"), CH_STRING_LITERAL, "file", 0, t);
+		// connect the node
+		if (null_input)
+		{
+			small_cloud_file_node->setInput(0, null_input);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_file_node->moveToGoodPosition();
+
+		// Pack Node
+		// create node
+		small_cloud_pack_node = parent->createNode("pack", "smallcloudpack");
+		if (!small_cloud_pack_node)
+			return error();
+		// run creation script
+		if (!small_cloud_pack_node->runCreateScript())
+			return error();
+		// connect the node
+		if (small_cloud_file_node)
+		{
+			small_cloud_pack_node->setInput(0, small_cloud_file_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_pack_node->moveToGoodPosition();
+
+		// Material Node
+		// create node
+		small_cloud_material_node = parent->createNode("material", "smallcloudmaterial");
+		if (!small_cloud_material_node)
+			return error();
+		// run creation script
+		if (!small_cloud_material_node->runCreateScript())
+			return error();
+		// set parameters
+		small_cloud_material_node->setString(UT_String("/mat/cloud_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (small_cloud_pack_node)
+		{
+			small_cloud_material_node->setInput(0, small_cloud_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_material_node->moveToGoodPosition();
+
+		// Medium Cloud Primitive 
+		// File Node
+		// create node
+		med_cloud_file_node = parent->createNode("file", "medcloudfile");
+		if (!med_cloud_file_node)
+			return error();
+		// run creation script
+		if (!med_cloud_file_node->runCreateScript())
+			return error();
+		// set parameters
+		med_cloud_file_node->setString(UT_String("`chs(\"../CusEcoSim1/medcloudgeo\")`"), CH_STRING_LITERAL, "file", 0, t);
+		// connect the node
+		if (null_input)
+		{
+			med_cloud_file_node->setInput(0, null_input);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_file_node->moveToGoodPosition();
+
+		// Pack Node
+		// create node
+		med_cloud_pack_node = parent->createNode("pack", "medcloudpack");
+		if (!med_cloud_pack_node)
+			return error();
+		// run creation script
+		if (!med_cloud_pack_node->runCreateScript())
+			return error();
+		// connect the node
+		if (med_cloud_file_node)
+		{
+			med_cloud_pack_node->setInput(0, med_cloud_file_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_pack_node->moveToGoodPosition();
+
+		// Material Node
+		// create node
+		med_cloud_material_node = parent->createNode("material", "medcloudmaterial");
+		if (!med_cloud_material_node)
+			return error();
+		// run creation script
+		if (!med_cloud_material_node->runCreateScript())
+			return error();
+		// set parameters
+		med_cloud_material_node->setString(UT_String("/mat/cloud_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (med_cloud_pack_node)
+		{
+			med_cloud_material_node->setInput(0, med_cloud_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_material_node->moveToGoodPosition();
+		
+		// Big Cloud Primitive 
+		// File Node
+		// create node
+		big_cloud_file_node = parent->createNode("file", "bigcloudfile");
+		if (!big_cloud_file_node)
+			return error();
+		// run creation script
+		if (!big_cloud_file_node->runCreateScript())
+			return error();
+		// set parameters
+		big_cloud_file_node->setString(UT_String("`chs(\"../CusEcoSim1/bigcloudgeo\")`"), CH_STRING_LITERAL, "file", 0, t);
+		// connect the node
+		if (null_input)
+		{
+			big_cloud_file_node->setInput(0, null_input);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_file_node->moveToGoodPosition();
+
+		// Pack Node
+		// create node
+		big_cloud_pack_node = parent->createNode("pack", "bigcloudpack");
+		if (!big_cloud_pack_node)
+			return error();
+		// run creation script
+		if (!big_cloud_pack_node->runCreateScript())
+			return error();
+		// connect the node
+		if (big_cloud_file_node)
+		{
+			big_cloud_pack_node->setInput(0, big_cloud_file_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_pack_node->moveToGoodPosition();
+
+		// Material Node
+		// create node
+		big_cloud_material_node = parent->createNode("material", "bigcloudmaterial");
+		if (!big_cloud_material_node)
+			return error();
+		// run creation script
+		if (!big_cloud_material_node->runCreateScript())
+			return error();
+		// set parameters
+		big_cloud_material_node->setString(UT_String("/mat/cloud_shader"), CH_STRING_LITERAL, "shop_materialpath1", 0, t);
+		// connect the node
+		if (big_cloud_pack_node)
+		{
+			big_cloud_material_node->setInput(0, big_cloud_pack_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_material_node->moveToGoodPosition();
+
+		// Small Clouds
+		// (Seed) Group Node
+		// create node
+		small_cloud_group_node = parent->createNode("groupcreate", "smallcloudgroup");
+		if (!small_cloud_group_node)
+			return error();
+		// run creation script
+		if (!small_cloud_group_node->runCreateScript())
+			return error();
+		// set parameters
+		small_cloud_group_node->setString(UT_String("smallcloudgroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		small_cloud_group_node->setString(UT_String("`chs(\"../CusEcoSim1/smallCloudPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
+		// connect the node
+		if (convert_heightfield_node)
+		{
+			small_cloud_group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_group_node->moveToGoodPosition();
+
+		// Scatter node
+		// create node
+		small_cloud_scatter_node = parent->createNode("scatter", "smallcloudscatter");
+		if (!small_cloud_scatter_node)
+			return error();
+		// run creation script
+		if (!small_cloud_scatter_node->runCreateScript())
+			return error();
+		// set parameters
+		small_cloud_scatter_node->setString(UT_String("smallcloudgroup"), CH_STRING_LITERAL, "group", 0, t);
+		small_cloud_scatter_node->setInt("generateby", 0, t, 1);
+		small_cloud_scatter_node->setInt("primcountattrib", 0, t, 1);
+
+		// connect the node
+		if (small_cloud_group_node)
+		{
+			small_cloud_scatter_node->setInput(0, small_cloud_group_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_scatter_node->moveToGoodPosition();
+
+		// Copy to Points Node
+		// create node
+		small_cloud_copy_to_points_node = parent->createNode("copytopoints", "smallcloudcopytopoints");
+		if (!small_cloud_copy_to_points_node)
+			return error();
+		// run creation script
+		if (!small_cloud_copy_to_points_node->runCreateScript())
+			return error();
+		// connect the node
+		if (small_cloud_material_node)
+		{
+			small_cloud_copy_to_points_node->setInput(0, small_cloud_material_node);       // set first input to /obj/null1
+		}
+		if (small_cloud_scatter_node) {
+			small_cloud_copy_to_points_node->setInput(1, small_cloud_scatter_node);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		small_cloud_copy_to_points_node->moveToGoodPosition();
+		
+		// Medium Clouds
+		// (Seed) Group Node
+		// create node
+		med_cloud_group_node = parent->createNode("groupcreate", "medcloudgroup");
+		if (!med_cloud_group_node)
+			return error();
+		// run creation script
+		if (!med_cloud_group_node->runCreateScript())
+			return error();
+		// set parameters
+		med_cloud_group_node->setString(UT_String("medcloudgroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		med_cloud_group_node->setString(UT_String("`chs(\"../CusEcoSim1/medCloudPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
+		// connect the node
+		if (convert_heightfield_node)
+		{
+			med_cloud_group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_group_node->moveToGoodPosition();
+
+		// Scatter node
+		// create node
+		med_cloud_scatter_node = parent->createNode("scatter", "medcloudscatter");
+		if (!med_cloud_scatter_node)
+			return error();
+		// run creation script
+		if (!med_cloud_scatter_node->runCreateScript())
+			return error();
+		// set parameters
+		med_cloud_scatter_node->setString(UT_String("medcloudgroup"), CH_STRING_LITERAL, "group", 0, t);
+		med_cloud_scatter_node->setInt("generateby", 0, t, 1);
+		med_cloud_scatter_node->setInt("primcountattrib", 0, t, 1);
+
+		// connect the node
+		if (med_cloud_group_node)
+		{
+			med_cloud_scatter_node->setInput(0, med_cloud_group_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_scatter_node->moveToGoodPosition();
+
+		// Copy to Points Node
+		// create node
+		med_cloud_copy_to_points_node = parent->createNode("copytopoints", "medcloudcopytopoints");
+		if (!med_cloud_copy_to_points_node)
+			return error();
+		// run creation script
+		if (!med_cloud_copy_to_points_node->runCreateScript())
+			return error();
+		// connect the node
+		if (med_cloud_material_node)
+		{
+			med_cloud_copy_to_points_node->setInput(0, med_cloud_material_node);       // set first input to /obj/null1
+		}
+		if (med_cloud_scatter_node) {
+			med_cloud_copy_to_points_node->setInput(1, med_cloud_scatter_node);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		med_cloud_copy_to_points_node->moveToGoodPosition();
+
+		// Big Clouds
+		// (Seed) Group Node
+		// create node
+		big_cloud_group_node = parent->createNode("groupcreate", "bigcloudgroup");
+		if (!big_cloud_group_node)
+			return error();
+		// run creation script
+		if (!big_cloud_group_node->runCreateScript())
+			return error();
+		// set parameters
+		big_cloud_group_node->setString(UT_String("bigcloudgroup"), CH_STRING_LITERAL, "groupname", 0, t);
+		big_cloud_group_node->setString(UT_String("`chs(\"../CusEcoSim1/bigCloudPlacement\")`"), CH_STRING_LITERAL, "basegroup", 0, t);
+		// connect the node
+		if (convert_heightfield_node)
+		{
+			big_cloud_group_node->setInput(0, convert_heightfield_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_group_node->moveToGoodPosition();
+
+		// Scatter node
+		// create node
+		big_cloud_scatter_node = parent->createNode("scatter", "bigcloudscatter");
+		if (!big_cloud_scatter_node)
+			return error();
+		// run creation script
+		if (!big_cloud_scatter_node->runCreateScript())
+			return error();
+		// set parameters
+		big_cloud_scatter_node->setString(UT_String("bigcloudgroup"), CH_STRING_LITERAL, "group", 0, t);
+		big_cloud_scatter_node->setInt("generateby", 0, t, 1);
+		big_cloud_scatter_node->setInt("primcountattrib", 0, t, 1);
+
+		// connect the node
+		if (big_cloud_group_node)
+		{
+			big_cloud_scatter_node->setInput(0, big_cloud_group_node);       // set first input to /obj/null1
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_scatter_node->moveToGoodPosition();
+
+		// Copy to Points Node
+		// create node
+		big_cloud_copy_to_points_node = parent->createNode("copytopoints", "bigcloudcopytopoints");
+		if (!big_cloud_copy_to_points_node)
+			return error();
+		// run creation script
+		if (!big_cloud_copy_to_points_node->runCreateScript())
+			return error();
+		// connect the node
+		if (big_cloud_material_node)
+		{
+			big_cloud_copy_to_points_node->setInput(0, big_cloud_material_node);       // set first input to /obj/null1
+		}
+		if (big_cloud_scatter_node) {
+			big_cloud_copy_to_points_node->setInput(1, big_cloud_scatter_node);
+		}
+		// now that done we're done connecting it, position it relative to its
+		// inputs
+		big_cloud_copy_to_points_node->moveToGoodPosition();
+
 		// Merge Node
 		// create node
 		merge_node = parent->createNode("merge", "merge1");
@@ -825,6 +1220,15 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		}
 		if (decaying_copy_to_points_node) {
 			merge_node->setInput(4, decaying_copy_to_points_node);
+		}
+		if (small_cloud_copy_to_points_node) {
+			merge_node->setInput(5, small_cloud_copy_to_points_node);
+		}
+		if (med_cloud_copy_to_points_node) {
+			merge_node->setInput(6, med_cloud_copy_to_points_node);
+		}
+		if (big_cloud_copy_to_points_node) {
+			merge_node->setInput(7, big_cloud_copy_to_points_node);
 		}
 		// now that done we're done connecting it, position it relative to its
 		// inputs
@@ -900,10 +1304,47 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	OP_Node* decaying_group_node;
 	decaying_group_node = parent->findNode("decayinggroup");
 	if (decaying.length() > 0) {
+		decaying_group_node->setInt("groupbase", 0, t, 1);
 		decaying_group_node->setString(UT_String(decaying), CH_STRING_LITERAL, "basegroup", 0, t);
 	}
 	else {
 		decaying_group_node->setInt("groupbase", 0, t, 0);
+	}
+
+	// get list of clouds to render
+	std::string small_pos;
+	std::string med_pos;
+	std::string big_pos;
+	eco.getCloudPositions(small_pos, med_pos, big_pos);
+
+	OP_Node* small_cloud_group_node;
+	small_cloud_group_node = parent->findNode("smallcloudgroup");
+	if (small_pos.length() > 0) {
+		small_cloud_group_node->setInt("groupbase", 0, t, 1);
+		small_cloud_group_node->setString(UT_String(small_pos), CH_STRING_LITERAL, "basegroup", 0, t);
+	}
+	else {
+		small_cloud_group_node->setInt("groupbase", 0, t, 0);
+	}
+
+	OP_Node* med_cloud_group_node;
+	med_cloud_group_node = parent->findNode("medcloudgroup");
+	if (med_pos.length() > 0) {
+		med_cloud_group_node->setInt("groupbase", 0, t, 1);
+		med_cloud_group_node->setString(UT_String(med_pos), CH_STRING_LITERAL, "basegroup", 0, t);
+	}
+	else {
+		med_cloud_group_node->setInt("groupbase", 0, t, 0);
+	}
+
+	OP_Node* big_cloud_group_node;
+	big_cloud_group_node = parent->findNode("bigcloudgroup");
+	if (big_pos.length() > 0) {
+		big_cloud_group_node->setInt("groupbase", 0, t, 1);
+		big_cloud_group_node->setString(UT_String(big_pos), CH_STRING_LITERAL, "basegroup", 0, t);
+	}
+	else {
+		big_cloud_group_node->setInt("groupbase", 0, t, 0);
 	}
 
 	// 1. Lock inputs, causes them to be cooked first.
