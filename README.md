@@ -1,8 +1,14 @@
 # EcoSim
 
+![Houdini Render](https://github.com/gserena01/EcoSim/blob/main/Render1.png)
+
 Demo
 --------
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/FLVmGrclKW4/0.jpg)](https://www.youtube.com/watch?v=FLVmGrclKW4)
+
+Exporting Geometry:
+--------
+To export the current geometry, click on the "export" file node, opt to display/render it, and click reload geometry. By default, the geometry will be exported to "Exported_Geometry.obj".
 
 Beta Version Features
 ---------------------------
