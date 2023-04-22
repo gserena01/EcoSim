@@ -1,6 +1,6 @@
 # EcoSim
 
-[![Houdini Render](https://github.com/gserena01/EcoSim/blob/main/Render1.png)]
+![Houdini Render](https://github.com/gserena01/EcoSim/blob/main/Render1.png)
 
 Demo
 --------
