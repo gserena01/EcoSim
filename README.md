@@ -6,6 +6,10 @@ Demo
 --------
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/FLVmGrclKW4/0.jpg)](https://www.youtube.com/watch?v=FLVmGrclKW4)
 
+Exporting Geometry:
+--------
+To export the current geometry, click on the "export" file node, opt to display/render it, and click reload geometry. By default, the geometry will be exported to "Exported_Geometry.obj".
+
 Beta Version Features
 ---------------------------
 In the beta version, you can create an EcoSim node in Houdini, which automaticially starts with noise-based distribution of soil water, vapor water, and starter trees. Additionally, the nodes already connect to the included tree mesh files. This node structure in Houdini is fully developed and allows the user to either control the environment via the GUI or by directly manipulating the node parameters if they are more familiar with the software.  
