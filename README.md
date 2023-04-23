@@ -6,6 +6,10 @@ Demo
 --------
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/FLVmGrclKW4/0.jpg)](https://www.youtube.com/watch?v=FLVmGrclKW4)
 
+Uploading your own files:
+--------
+This plug-in allows you to input your own geometry and texture files. For textures, please upload an 32x32 pixel image file (yes, it's tiny!). For geometry files, any .fbx, .obj, or other standard geometry file will work, though we suggest using lower poly geometry to keep the plugin running quickly, since the input geometry will be replicated many times.
+
 Exporting Geometry:
 --------
 To export the current geometry, click on the "export" file node, opt to display/render it, and click reload geometry. By default, the geometry will be exported to "Exported_Geometry.obj".
