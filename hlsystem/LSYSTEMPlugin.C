@@ -39,6 +39,8 @@ newSopOperator(OP_OperatorTable* table)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Declare your parameters here
+static PRM_Name geoLabelName("geoLabel", "");
+
 static PRM_Name terrainName("terrain", "Terrain");
 static PRM_Name	soilName("soil", "Soil Water");
 static PRM_Name	vaporName("vapor", "Vapor Water");
@@ -52,13 +54,17 @@ static PRM_Name	smallcloudgeoName("smallcloudgeo", "Small Cloud Geometry");
 static PRM_Name	medcloudgeoName("medcloudgeo", "Medium Cloud Geometry");
 static PRM_Name	bigcloudgeoName("bigcloudgeo", "Big Cloud Geometry");
 
+static PRM_Name behavLabelName("behavLabel", "");
+
+static PRM_Name		iterationName("years", "Years");
+static PRM_Name		evaporationName("evap", "Climate Dryness");
+
+static PRM_Name treeLabelName("treeLabel", "");
+
 static PRM_Name seedName("seedPlacement", "Seed Placement");
 static PRM_Name juvenileName("juvenilePlacement", "Juvenile Tree Placement");
 static PRM_Name matureName("maturePlacement", "Mature Tree Placement");
 static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
-
-static PRM_Name		iterationName("years", "Years");
-static PRM_Name		evaporationName("evap", "Evaporation Constant");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				     ^^^^^^^^    ^^^^^^^^^^^^^^^
@@ -85,6 +91,10 @@ static PRM_Default seedDefault(0, "");
 static PRM_Default juvenileDefault(0, "");
 static PRM_Default matureDefault(0, "");
 static PRM_Default decayingDefault(0, "");
+static PRM_Default geoLabelDefault(0, "Geometery Files");
+static PRM_Default treeLabelDefault(0, "Starter Tree Placement (grid numbers)");
+static PRM_Default behavLabelDefault(0, "Controls");
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,6 +102,8 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
+
+	PRM_Template(PRM_LABEL, 1, &geoLabelName, &geoLabelDefault),
 
 	PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
@@ -103,8 +115,13 @@ SOP_Lsystem::myTemplateList[] = {
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &medcloudgeoName, &medcloudgeoDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &bigcloudgeoName, &bigcloudgeoDefault, 0),
 
+	PRM_Template(PRM_LABEL, 1, &behavLabelName, &behavLabelDefault),
+
 	PRM_Template(PRM_INT, PRM_Template::PRM_EXPORT_MIN, 1, &iterationName, &iterationDefault, 0, &iterationRange),
 	PRM_Template(PRM_FLT, PRM_Template::PRM_EXPORT_MIN, 1, &evaporationName, &evaporationDefault, 0, &evaporationRange),
+
+	PRM_Template(PRM_LABEL, 1, &treeLabelName, &treeLabelDefault),
+
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &seedName, &seedDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &juvenileName, &juvenileDefault, 0),
 	PRM_Template(PRM_STRING, PRM_Template::PRM_EXPORT_MIN, 1, &matureName, &matureDefault, 0),
@@ -1274,11 +1291,36 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	int itr = YEARS(now);
 	float evap_const = EVAP(now);
 
-	// update eco simulation
+	UT_String seed_placement;
+	SEEDSTR(now, seed_placement);
+
+	UT_String juv_placement;
+	JUVSTR(now, juv_placement);
+
+	UT_String mature_placement;
+	MATURESTR(now, mature_placement);
+
+	UT_String decay_placement;
+	DECAYSTR(now, decay_placement);
+
+	// create eco simulation
 	EcoSim eco = EcoSim();
 	eco.EVAP_CONSTANT = evap_const;
+
+	// set trees by noise is default
 	eco.setTreesNoise();
-	//eco.setTreesString("1-10, 250-270, 700-800", eco.MATURE);
+
+	// sets trees with strings iff all are filled out
+	UT_String empty = "";
+	if (seed_placement != empty && juv_placement != empty && mature_placement != empty && decay_placement != empty) { 
+		eco.resetVegetation();
+		eco.setTreesString(seed_placement.toStdString(), eco.SEED);
+		eco.setTreesString(juv_placement.toStdString(), eco.JUVENILE);
+		eco.setTreesString(mature_placement.toStdString(), eco.MATURE);
+		eco.setTreesString(decay_placement.toStdString(), eco.DECAY);
+	}
+
+	// run the simulation 
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
 	}

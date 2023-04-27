@@ -85,9 +85,12 @@ public:
     void setTreesNoise();
     void setTreesString(std::string inputPos, int type);
     void setTreesManual(); // used for testing
+    void resetVegetation(); // clears trees and biomass
     // vapor and soil are automatically set with noise in the constructor, but they can be overwritten uniformly 
     void setVaporManual(float v); // used for testing
     void setSoilWaterManual(float s); // used for testing
+    void setBiomassManual(float s); // used for testing
+
 
     // PRINTERS (for testing)
     void printVapor();

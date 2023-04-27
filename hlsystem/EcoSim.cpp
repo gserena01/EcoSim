@@ -28,6 +28,14 @@ void EcoSim::setSoilWaterManual(float s) {
     }
 }
 
+void EcoSim::setBiomassManual(float s) {
+    for (int x = 0; x < TERRAIN_SIZE; ++x) {
+        for (int y = 0; y < TERRAIN_SIZE; ++y) {
+            biomass_values[x][y] = s;
+        }
+    }
+}
+
 void EcoSim::setTreesManual() {
     // sets trees vector, biomass map, vegetationNeeds map
     // sets manually created trees for testing
@@ -59,8 +67,6 @@ void::EcoSim::setTreesNoise() {
     // sets trees vector, biomass map, vegetationNeeds map
     // sets based on soil water noise function
 
-    treeSet = true;
-
     for (int x = 0; x < TERRAIN_SIZE; x += 2) {
         for (int y = 0; y < TERRAIN_SIZE; y += 2) {
             float w = soilWater_values[x][y];
@@ -89,6 +95,8 @@ void::EcoSim::setTreesNoise() {
     update_biomass();
     // set vegetationNeeds
     absorptionReqs();
+
+    treeSet = true;
 }
 
 void EcoSim::setTreesString(std::string input, int treeType) {
@@ -97,8 +105,6 @@ void EcoSim::setTreesString(std::string input, int treeType) {
 
     // converts the input string into a vector of ints
     std::vector<int> pos = processPosInput(input);
-
-    treeSet = true;
 
     int x;
     int y;
@@ -114,11 +120,23 @@ void EcoSim::setTreesString(std::string input, int treeType) {
         trees.push_back(t);
     }
 
+
     // update biomass values
     update_biomass();
     // set vegetationNeeds
     absorptionReqs();
 
+    treeSet = true;
+
+}
+
+void EcoSim::resetVegetation() {
+    if (treeSet) {
+        // trees have already been set
+        trees.clear();
+        setBiomassManual(0.0);
+        treeSet = false;
+    }
 }
 
 
@@ -201,6 +219,8 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     treenum.push_back(numJ);
     treenum.push_back(numM);
     treenum.push_back(numD);
+
+    std::cout << EVAP_CONSTANT << std::endl;
 
     return treenum;
 }
