@@ -220,8 +220,6 @@ std::vector<float> EcoSim::getTreePositions(std::string& seed_pos, std::string& 
     treenum.push_back(numM);
     treenum.push_back(numD);
 
-    std::cout << EVAP_CONSTANT << std::endl;
-
     return treenum;
 }
 

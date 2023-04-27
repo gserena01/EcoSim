@@ -71,7 +71,6 @@ static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 //				     internal    descriptive version
 
 
-// PUT YOUR CODE HERE
 // You need to setup the initial/default values for your parameters here
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
@@ -100,7 +99,6 @@ static PRM_Default behavLabelDefault(0, "Controls");
 
 PRM_Template
 SOP_Lsystem::myTemplateList[] = {
-	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
 
 	PRM_Template(PRM_LABEL, 1, &geoLabelName, &geoLabelDefault),
@@ -1377,7 +1375,11 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	std::string small_pos;
 	std::string med_pos;
 	std::string big_pos;
-	eco.getCloudPositions(small_pos, med_pos, big_pos);
+	if (itr >= 2) {
+		// Year 0-1 of vapor values are weird bc of noise 
+		// By year 2, all precipitation values are fully based on vegetation
+		eco.getCloudPositions(small_pos, med_pos, big_pos);
+	}
 
 	OP_Node* small_cloud_group_node;
 	small_cloud_group_node = parent->findNode("smallcloudgroup");
