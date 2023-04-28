@@ -59,8 +59,10 @@ public:
     const static int JUVENILE_MIN_AGE = 2;
     // MATURE = age >= 10
     const static int MATURE_MIN_AGE = 10;
+    // DECAY = MATURE + 1 (only mature trees can decay)
+    const static int DECAY_MIN_AGE = MATURE_MIN_AGE + 1;
 
-    constexpr const static float TreeMinAge[3] = { SEED_MIN_AGE, JUVENILE_MIN_AGE, MATURE_MIN_AGE };
+    constexpr const static float TreeMinAge[4] = { SEED_MIN_AGE, JUVENILE_MIN_AGE, MATURE_MIN_AGE, DECAY_MIN_AGE };
 
     // TreeMass AKA Heights and biomass values
     constexpr const static float TreeMass[5] = { 0.1, 5.0, 10.0, 7.5, 0.0 };
@@ -85,9 +87,12 @@ public:
     void setTreesNoise();
     void setTreesString(std::string inputPos, int type);
     void setTreesManual(); // used for testing
+    void resetVegetation(); // clears trees and biomass
     // vapor and soil are automatically set with noise in the constructor, but they can be overwritten uniformly 
     void setVaporManual(float v); // used for testing
     void setSoilWaterManual(float s); // used for testing
+    void setBiomassManual(float s); // used for testing
+
 
     // PRINTERS (for testing)
     void printVapor();

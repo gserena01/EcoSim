@@ -56,12 +56,14 @@ namespace HDK_Sample {
         /// The following list of accessors simplify evaluating the parameters
         /// of the SOP.
 
-        // PUT YOUR CODE HERE
-        // Here you need to declare functions which need to be called from the .C file to 
+        // Here we declare functions which need to be called from the .C file to 
         // constantly update the cook function, these functions help you get the current value that the node has
-        // Example : To declare a function to fetch angle you need to do it this way 
         int YEARS(fpreal t) { return evalInt("years", 0, t); }
-        int EVAP(fpreal t) { return evalFloat("evap", 0, t); }
+        float EVAP(fpreal t) { return evalFloat("evap", 0, t); }
+        void SEEDSTR(fpreal t, UT_String& str) { return evalString(str, "seedPlacement", 0, t); }
+        void JUVSTR(fpreal t, UT_String& str) { return evalString(str, "juvenilePlacement", 0, t); }
+        void MATURESTR(fpreal t, UT_String& str) { return evalString(str, "maturePlacement", 0, t); }
+        void DECAYSTR(fpreal t, UT_String& str) { return evalString(str, "decayingPlacement", 0, t); }
         int CUSTOMTERRAIN(fpreal t) { return evalInt("customterrain", 0, t); }
 
 
@@ -70,6 +72,7 @@ namespace HDK_Sample {
             evalString(str, "seedgeo", 0, t);
             return str;
         }
+
         UT_String TERRAIN(fpreal t) {
             UT_String str;
             evalString(str, "terrain", 0, t);
