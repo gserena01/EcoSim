@@ -12,6 +12,8 @@ This plug-in allows you to input your own geometry and texture files. For textur
 
 Exporting Geometry:
 --------
+![image](https://user-images.githubusercontent.com/60444726/235263101-1394fb21-1b47-4eff-9c1c-fa666683b155.png)
+
 To export the current geometry, click on the "export" file node, opt to display/render it, and click reload geometry. By default, the geometry will be exported to "Exported_Geometry.obj".
 
 Features Guide 
