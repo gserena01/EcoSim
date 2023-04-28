@@ -39,6 +39,7 @@ newSopOperator(OP_OperatorTable* table)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Declare your parameters here
+static PRM_Name customterrainName("customterrain", "Use Custom Terrain");
 static PRM_Name terrainName("terrain", "Terrain");
 static PRM_Name	soilName("soil", "Soil Water");
 static PRM_Name	vaporName("vapor", "Vapor Water");
@@ -67,13 +68,14 @@ static PRM_Name		evaporationName("evap", "Evaporation Constant");
 
 // PUT YOUR CODE HERE
 // You need to setup the initial/default values for your parameters here
+static PRM_Default customterrainDefault(false);
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
 								PRM_RANGE_UI, 30);
 static PRM_Default evaporationDefault(1.5);
 static PRM_Range evaporationRange(PRM_RANGE_UI, 0.0,
 								  PRM_RANGE_UI, 3.0);
-static PRM_Default terrainDefault(0, "$HIP/Assets/noise_texture.jpg");
+static PRM_Default terrainDefault(0, "$HIP/Assets/noise_texture.png");
 static PRM_Default seedgeoDefault(0, "$HIP/Assets/seed.obj");
 static PRM_Default juvenilegeoDefault(0, "$HIP/Assets/juvenile_tree.obj");
 static PRM_Default maturegeoDefault(0, "$HIP/Assets/mature_tree.obj");
@@ -92,7 +94,7 @@ PRM_Template
 SOP_Lsystem::myTemplateList[] = {
 	// PUT YOUR CODE HERE
 	// You now need to fill this template with your parameter name and their default value
-
+	PRM_Template(PRM_TOGGLE, PRM_Template::PRM_EXPORT_MIN, 1, &customterrainName, &customterrainDefault, false),
 	PRM_Template(PRM_PICFILE, PRM_Template::PRM_EXPORT_MIN, 1, &terrainName, &terrainDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &seedgeoName, &seedgeoDefault, 0),
 	PRM_Template(PRM_GEOFILE, PRM_Template::PRM_EXPORT_MIN, 1, &juvenilegeoName, &juvenilegeoDefault, 0),
@@ -1268,11 +1270,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	}
 
 	// gather parameters from GUI
-	std::string terrainFile = TERRAIN(now).toStdString();
-	std::string seedgeoFile = SEEDGEO(now).toStdString();
-
 	int itr = YEARS(now);
 	float evap_const = EVAP(now);
+	bool custom_terrain = CUSTOMTERRAIN(now);
 
 	// update eco simulation
 	EcoSim eco = EcoSim();
@@ -1281,6 +1281,16 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	//eco.setTreesString("1-10, 250-270, 700-800", eco.MATURE);
 	for (int i = 0; i < itr; ++i) {
 			eco.cycle();
+	}
+
+	// render proper terrain
+	OP_Node* switch_node;
+	switch_node = parent->findNode("switch1");
+	if (custom_terrain) {
+		switch_node->setInt("input", 0, t, 1);
+	}
+	else {
+		switch_node->setInt("input", 0, t, 0);
 	}
 
 	// get list of trees to render
