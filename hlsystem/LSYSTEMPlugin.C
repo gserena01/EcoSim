@@ -38,7 +38,7 @@ newSopOperator(OP_OperatorTable* table)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Declare your parameters here
+// Declare parameters here
 static PRM_Name geoLabelName("geoLabel", "");
 
 static PRM_Name customterrainName("customterrain", "Use Custom Terrain");
@@ -72,7 +72,7 @@ static PRM_Name decayingName("decayingPlacement", "Decaying Tree Placement");
 //				     internal    descriptive version
 
 
-// You need to setup the initial/default values for your parameters here
+// You need to setup the initial/default values for parameters here
 static PRM_Default customterrainDefault(false);
 static PRM_Default iterationDefault(0);
 static PRM_Range iterationRange(PRM_RANGE_UI,  0, 
@@ -101,7 +101,7 @@ static PRM_Default behavLabelDefault(0, "Controls");
 
 PRM_Template
 SOP_Lsystem::myTemplateList[] = {
-	// You now need to fill this template with your parameter name and their default value
+	// templates with parameter name and their default value
 
 	PRM_Template(PRM_LABEL, 1, &geoLabelName, &geoLabelDefault),
 	PRM_Template(PRM_TOGGLE, PRM_Template::PRM_EXPORT_MIN, 1, &customterrainName, &customterrainDefault, false),
@@ -1308,9 +1308,9 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// set trees by noise is default
 	eco.setTreesNoise();
 
-	// sets trees with strings iff all are filled out
+	// sets trees with strings if any str field is filled out
 	UT_String empty = "";
-	if (seed_placement != empty && juv_placement != empty && mature_placement != empty && decay_placement != empty) { 
+	if (seed_placement != empty || juv_placement != empty || mature_placement != empty || decay_placement != empty) { 
 		eco.resetVegetation();
 		eco.setTreesString(seed_placement.toStdString(), eco.SEED);
 		eco.setTreesString(juv_placement.toStdString(), eco.JUVENILE);
@@ -1432,7 +1432,6 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 	// 4. Unlock inputs
 	unlockInputs();
 
-	// PUT YOUR CODE HERE 
 	UT_Interrupt* boss;
 
 	int divisions = 5;	// We need twice our divisions of points

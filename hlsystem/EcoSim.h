@@ -42,8 +42,8 @@ public:
 
     // Data for tree seed spawn
     int treeID;
-    float theta = 17.0;
-    float seedR = 2.6; // paper cites numbers 1.5 - 2.6
+    float theta = 17.0; // rng seed
+    float seedR = 2.6; // radius for dispersing seeds from tree, paper cites numbers 1.5 - 2.6
 
     //// Tree Growth State INDICES
     const static int SEED = 0;
@@ -137,6 +137,7 @@ private:
     constexpr static const float small_cloud = 1.0;
     constexpr static const float med_cloud = 4.0;
     constexpr static const float big_cloud = 10.0;
+
 
     ///// WATER CYCLE MAP VALUES
 

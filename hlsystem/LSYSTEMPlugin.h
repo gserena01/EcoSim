@@ -36,8 +36,8 @@ namespace HDK_Sample {
         /// case, a LSYSTEM
         virtual OP_ERROR		 cookMySop(OP_Context& context);
 
-        /// This function is used to lookup local variables that you have
-        /// defined specific to your SOP.
+        /// This function is used to lookup local variables that we have
+        /// defined specific to our SOP.
         virtual bool		 evalVariableValue(
             fpreal& val,
             int index,
