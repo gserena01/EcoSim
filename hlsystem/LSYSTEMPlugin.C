@@ -1310,7 +1310,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 
 	// sets trees with strings iff all are filled out
 	UT_String empty = "";
-	if (seed_placement != empty && juv_placement != empty && mature_placement != empty && decay_placement != empty) { 
+	if (seed_placement != empty || juv_placement != empty || mature_placement != empty || decay_placement != empty) { 
 		eco.resetVegetation();
 		eco.setTreesString(seed_placement.toStdString(), eco.SEED);
 		eco.setTreesString(juv_placement.toStdString(), eco.JUVENILE);
