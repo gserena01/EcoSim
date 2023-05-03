@@ -28,8 +28,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CAB016C6-D07C-4011-AB67-44526A60B102}</ProjectGuid>
-    <RootNamespace>hlsystem</RootNamespace>
+    <RootNamespace>hecosim</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>hecosim</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release64|Win32'" Label="Configuration">
@@ -275,7 +276,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EcoSim.cpp" />
-    <ClCompile Include="LSYSTEMPlugin.C">
+    <ClCompile Include="ECOSIMPlugin.C">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -286,10 +287,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EcoSim.h" />
-    <ClInclude Include="LSYSTEMPlugin.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="matrix.h">
+    <ClInclude Include="ECOSIMPlugin.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Texture.h" />

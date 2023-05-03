@@ -1,16 +1,15 @@
 
 
-#ifndef __LSYSTEM_PLUGIN_h__
-#define __LSYSTEM_PLUGIN_h__
+#ifndef __ECOSIM_PLUGIN_h__
+#define __ECOSIM_PLUGIN_h__
 
 //#include <GEO/GEO_Point.h>
 //
 #include <SOP/SOP_Node.h>
-#include "LSystem.h"
 #include "EcoSim.h"
 
 namespace HDK_Sample {
-    class SOP_Lsystem : public SOP_Node
+    class SOP_EcoSim : public SOP_Node
     {
     public:
         static OP_Node* myConstructor(OP_Network*, const char*,
@@ -25,15 +24,14 @@ namespace HDK_Sample {
 
     protected:
 
-        SOP_Lsystem(OP_Network* net, const char* name, OP_Operator* op);
-        virtual ~SOP_Lsystem();
+        SOP_EcoSim(OP_Network* net, const char* name, OP_Operator* op);
+        virtual ~SOP_EcoSim();
 
         /// Disable parameters according to other parameters.
         virtual unsigned		 disableParms();
 
 
-        /// cookMySop does the actual work of the SOP computing, in this
-        /// case, a LSYSTEM
+        /// cookMySop does the actual work of the SOP computing
         virtual OP_ERROR		 cookMySop(OP_Context& context);
 
         /// This function is used to lookup local variables that we have

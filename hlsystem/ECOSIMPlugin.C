@@ -14,7 +14,7 @@
 #include <OP/OP_Director.h>
 
 #include <limits.h>
-#include "LSYSTEMPlugin.h"
+#include "ECOSIMPlugin.h"
 using namespace HDK_Sample;
 
 ///
@@ -27,12 +27,12 @@ newSopOperator(OP_OperatorTable* table)
 {
 	table->addOperator(
 		new OP_Operator("CusEcoSim",			// Internal name
-			"ecoSim",			// UI name
-			SOP_Lsystem::myConstructor,	// How to build the SOP
-			SOP_Lsystem::myTemplateList,	// My parameters
+			"EcoSim",			// UI name
+			SOP_EcoSim::myConstructor,	// How to build the SOP
+			SOP_EcoSim::myTemplateList,	// My parameters
 			0,				// Min # of sources
 			1,				// Max # of sources
-			SOP_Lsystem::myVariables,	// Local variables
+			SOP_EcoSim::myVariables,	// Local variables
 			OP_FLAG_GENERATOR)		// Flag it as generator
 	);
 }
@@ -100,7 +100,7 @@ static PRM_Default behavLabelDefault(0, "Controls");
 ////////////////////////////////////////////////////////////////////////////////////////
 
 PRM_Template
-SOP_Lsystem::myTemplateList[] = {
+SOP_EcoSim::myTemplateList[] = {
 	// templates with parameter name and their default value
 
 	PRM_Template(PRM_LABEL, 1, &geoLabelName, &geoLabelDefault),
@@ -140,14 +140,14 @@ enum {
 };
 
 CH_LocalVariable
-SOP_Lsystem::myVariables[] = {
+SOP_EcoSim::myVariables[] = {
 	{ "PT",	VAR_PT, 0 },		// The table provides a mapping
 	{ "NPT",	VAR_NPT, 0 },		// from text string to integer token
 	{ 0, 0, 0 },
 };
 
 bool
-SOP_Lsystem::evalVariableValue(fpreal& val, int index, int thread)
+SOP_EcoSim::evalVariableValue(fpreal& val, int index, int thread)
 {
 	// myCurrPoint will be negative when we're not cooking so only try to
 	// handle the local variables when we have a valid myCurrPoint index.
@@ -172,28 +172,28 @@ SOP_Lsystem::evalVariableValue(fpreal& val, int index, int thread)
 }
 
 OP_Node*
-SOP_Lsystem::myConstructor(OP_Network* net, const char* name, OP_Operator* op)
+SOP_EcoSim::myConstructor(OP_Network* net, const char* name, OP_Operator* op)
 {
-	return new SOP_Lsystem(net, name, op);
+	return new SOP_EcoSim(net, name, op);
 }
 
-SOP_Lsystem::SOP_Lsystem(OP_Network* net, const char* name, OP_Operator* op)
+SOP_EcoSim::SOP_EcoSim(OP_Network* net, const char* name, OP_Operator* op)
 	: SOP_Node(net, name, op)
 {
 	myCurrPoint = -1;	// To prevent garbage values from being returned
 	networkCreated = -1;
 }
 
-SOP_Lsystem::~SOP_Lsystem() {}
+SOP_EcoSim::~SOP_EcoSim() {}
 
 unsigned
-SOP_Lsystem::disableParms()
+SOP_EcoSim::disableParms()
 {
 	return 0;
 }
 
 OP_ERROR
-SOP_Lsystem::cookMySop(OP_Context& context)
+SOP_EcoSim::cookMySop(OP_Context& context)
 {
 	fpreal		 now = context.getTime();
 	float           t = context.getTime();
@@ -1452,7 +1452,7 @@ SOP_Lsystem::cookMySop(OP_Context& context)
 		}
 
 		// Start the interrupt server
-		if (boss->opStart("Building LSYSTEM"))
+		if (boss->opStart("Building ECOSIM"))
 		{
 			
 		}

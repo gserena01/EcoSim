@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LSYSTEMPlugin.C">
+    <ClCompile Include="ECOSIMPlugin.C">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vec.cpp">
@@ -32,10 +32,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LSYSTEMPlugin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="matrix.h">
+    <ClInclude Include="ECOSIMPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vec.h">
