@@ -37,6 +37,7 @@ void EcoSim::setBiomassManual(float s) {
 }
 
 void EcoSim::setTreesManual() {
+    // USED FOR TESTING 
     // sets trees vector, biomass map, vegetationNeeds map
     // sets manually created trees for testing
     treeSet = true;
@@ -516,6 +517,7 @@ std::vector<int> EcoSim::processPosInput(std::string input) {
 
 
 //// PRINTERS
+// used for testing 
 
 void EcoSim::printVapor() {
     for (int z = 0; z < TERRAIN_SIZE; ++z) {

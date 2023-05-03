@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LSYSTEMPlugin.C">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LSYSTEMPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
